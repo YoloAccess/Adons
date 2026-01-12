@@ -1020,6 +1020,23 @@ builder.defineStreamHandler(async (args) => {
             } else { // 'tv'
                 if (!movieOrSeriesTitle) movieOrSeriesTitle = tmdbDetails.name;
                 movieOrSeriesYear = tmdbDetails.first_air_date ? tmdbDetails.first_air_date.substring(0, 4) : null;
+
+                // Fetch external IDs for TV shows to get IMDB ID
+                if (!global.currentRequestImdbId) {
+                    try {
+                        const externalIdsUrl = `${TMDB_API_URL}/tv/${tmdbId}/external_ids?api_key=${TMDB_API_KEY}`;
+                        const externalIdsResponse = await fetchWithRetry(externalIdsUrl, {});
+                        if (externalIdsResponse.ok) {
+                            const externalIds = await externalIdsResponse.json();
+                            if (externalIds.imdb_id) {
+                                global.currentRequestImdbId = externalIds.imdb_id;
+                                console.log(`  Fetched IMDB ID for TV show: ${global.currentRequestImdbId}`);
+                            }
+                        }
+                    } catch (e) {
+                        console.error('  Failed to fetch external IDs for TV show:', e.message);
+                    }
+                }
             }
             console.log(`  Fetched/Confirmed TMDB details: Title='${movieOrSeriesTitle}', Year='${movieOrSeriesYear}'${global.currentRequestImdbId ? `, IMDB='${global.currentRequestImdbId}'` : ''}`);
 
