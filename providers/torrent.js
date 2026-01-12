@@ -605,39 +605,32 @@ async function getMovieTorrents(imdbId, title, year) {
     console.log(`[Torrents] Fetching movie torrents for: ${title} (${year})`);
 
     const streams = [];
+    const promises = [];
 
     // 1. YTS
-    const ytsStreams = await getYTSTorrents(imdbId, title);
-    streams.push(...ytsStreams);
+    promises.push(getYTSTorrents(imdbId, title));
 
-    // 2. TorrentGalaxy (New)
-    if (streams.length < 5) {
-        // TGX prefers "Title Year" format
-        const query = year ? `${title} ${year}` : title;
-        const tgxStreams = await getTorrentGalaxyTorrents(query);
-        streams.push(...tgxStreams);
-    }
+    // 2. TorrentGalaxy
+    const queryYear = year ? `${title} ${year}` : title;
+    promises.push(getTorrentGalaxyTorrents(queryYear));
 
     // 3. APIBay (TPB)
-    if (streams.length < 5) {
-        const searchQuery = year ? `${title} ${year}` : title;
-        const tpbStreams = await getAPIBayTorrents(searchQuery);
-        streams.push(...tpbStreams);
-    }
+    promises.push(getAPIBayTorrents(queryYear));
 
-    // 4. BitSearch (New)
-    if (streams.length < 5) {
-        const query = year ? `${title} ${year}` : title;
-        const bsStreams = await getBitSearchTorrents(query);
-        streams.push(...bsStreams);
-    }
+    // 4. BitSearch
+    promises.push(getBitSearchTorrents(queryYear));
 
     // 5. 1337x
-    if (streams.length < 5) {
-        const searchQuery = year ? `${title} ${year}` : title;
-        const fallbackStreams = await get1337xTorrents(searchQuery, 'movie');
-        streams.push(...fallbackStreams);
-    }
+    promises.push(get1337xTorrents(queryYear, 'movie'));
+
+    // Execute all in parallel
+    const results = await Promise.allSettled(promises);
+
+    results.forEach(result => {
+        if (result.status === 'fulfilled' && Array.isArray(result.value)) {
+            streams.push(...result.value);
+        }
+    });
 
     // Remove duplicates by infoHash
     const uniqueStreams = [];
@@ -666,37 +659,35 @@ async function getSeriesTorrents(imdbId, title, season, episode) {
     console.log(`[Torrents] Fetching series torrents for: ${title} S${season}E${episode}`);
 
     const streams = [];
+    const promises = [];
+
     const seasonPadded = String(season).padStart(2, '0');
     const episodePadded = String(episode).padStart(2, '0');
     const standardQuery = `${title} S${seasonPadded}E${episodePadded}`;
 
     // 1. EZTV
-    const eztvStreams = await getEZTVTorrents(imdbId, season, episode);
-    streams.push(...eztvStreams);
+    promises.push(getEZTVTorrents(imdbId, season, episode));
 
-    // 2. TorrentGalaxy (New)
-    if (streams.length < 5) {
-        const tgxStreams = await getTorrentGalaxyTorrents(standardQuery);
-        streams.push(...tgxStreams);
-    }
+    // 2. TorrentGalaxy
+    promises.push(getTorrentGalaxyTorrents(standardQuery));
 
     // 3. APIBay (TPB)
-    if (streams.length < 5) {
-        const tpbStreams = await getAPIBayTorrents(standardQuery);
-        streams.push(...tpbStreams);
-    }
+    promises.push(getAPIBayTorrents(standardQuery));
 
-    // 4. BitSearch (New)
-    if (streams.length < 5) {
-        const bsStreams = await getBitSearchTorrents(standardQuery);
-        streams.push(...bsStreams);
-    }
+    // 4. BitSearch
+    promises.push(getBitSearchTorrents(standardQuery));
 
     // 5. 1337x
-    if (streams.length < 5) {
-        const fallbackStreams = await get1337xTorrents(standardQuery, 'series');
-        streams.push(...fallbackStreams);
-    }
+    promises.push(get1337xTorrents(standardQuery, 'series'));
+
+    // Execute all in parallel
+    const results = await Promise.allSettled(promises);
+
+    results.forEach(result => {
+        if (result.status === 'fulfilled' && Array.isArray(result.value)) {
+            streams.push(...result.value);
+        }
+    });
 
     // Remove duplicates
     const uniqueStreams = [];

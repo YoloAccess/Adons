@@ -1924,12 +1924,23 @@ builder.defineStreamHandler(async (args) => {
             ));
 
             providerResults = currentResults.map((result, index) => {
-                const providerNames = ['ShowBox', 'Soaper TV', 'VidSrc', 'VidZee', 'MP4Hydra', 'UHDMovies', 'MoviesMod', 'TopMovies', 'MoviesDrive', '4KHDHub', 'HDHub4u', 'Vixsrc', 'MovieBox', 'VidKing'];
+                const providerNames = [
+                    'ShowBox', 'Soaper TV', 'VidSrc', 'VidZee', 'MP4Hydra', 'UHDMovies',
+                    'MoviesMod', 'TopMovies', 'MoviesDrive', '4KHDHub', 'HDHub4u',
+                    'Vixsrc', 'MovieBox', 'VidKing', 'AutoEmbed', 'Torrent'
+                ];
+                const cleanProviderName = providerNames[index] || `Unknown (${index})`;
+
                 if (result.status === 'fulfilled' && Array.isArray(result.value) && result.value.length > 0) {
-                    console.log(`[Timeout] Provider ${providerNames[index]} completed with ${result.value.length} streams.`);
+                    console.log(`[Timeout] Provider ${cleanProviderName} completed with ${result.value.length} streams.`);
                     return result.value;
                 } else {
-                    console.log(`[Timeout] Provider ${providerNames[index]} did not complete in time or returned no streams.`);
+                    // Check if it was rejected or just empty
+                    if (result.status === 'rejected') {
+                        console.log(`[Timeout] Provider ${cleanProviderName} failed/timed out.`);
+                    } else {
+                        console.log(`[Timeout] Provider ${cleanProviderName} returned no streams.`);
+                    }
                     return []; // Return empty array for incomplete/failed providers
                 }
             });
