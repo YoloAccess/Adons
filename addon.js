@@ -182,6 +182,10 @@ console.log(`[addon.js] MovieBox provider fetching enabled: ${ENABLE_MOVIEBOX_PR
 const ENABLE_VIDKING_PROVIDER = process.env.ENABLE_VIDKING_PROVIDER !== 'false'; // Defaults to true if not set or not 'false'
 console.log(`[addon.js] VidKing provider fetching enabled: ${ENABLE_VIDKING_PROVIDER}`);
 
+// NEW: Read environment variable for AutoEmbed (Hindi streams)
+const ENABLE_AUTOEMBED_PROVIDER = process.env.ENABLE_AUTOEMBED_PROVIDER !== 'false'; // Defaults to true if not set or not 'false'
+console.log(`[addon.js] AutoEmbed (Hindi) provider fetching enabled: ${ENABLE_AUTOEMBED_PROVIDER}`);
+
 // External provider service configuration
 const USE_EXTERNAL_PROVIDERS = process.env.USE_EXTERNAL_PROVIDERS === 'true';
 const EXTERNAL_UHDMOVIES_URL = USE_EXTERNAL_PROVIDERS ? process.env.EXTERNAL_UHDMOVIES_URL : null;
@@ -218,6 +222,7 @@ const { getHDHub4uStreams } = require('./providers/hdhub4u.js'); // NEW: Import 
 const { getVixsrcStreams } = require('./providers/vixsrc.js'); // NEW: Import from vixsrc.js
 const { getMovieBoxStreams } = require('./providers/moviebox.js'); // NEW: Import from moviebox.js
 const { getVidKingStreams } = require('./providers/vidking.js'); // NEW: Import from vidking.js
+const { getAutoEmbedStreams } = require('./providers/autoembed.js'); // NEW: Import AutoEmbed for Hindi streams
 const axios = require('axios'); // For external provider requests
 
 // Helper function to make requests to external provider services
@@ -1743,6 +1748,48 @@ builder.defineStreamHandler(async (args) => {
                 await saveStreamToCache('vidking', tmdbTypeFromId, tmdbId, [], 'failed', seasonNum, episodeNum);
                 return [];
             }
+        },
+
+        // AutoEmbed provider with cache integration (Hindi/Multi-language)
+        autoembed: async () => {
+            if (!ENABLE_AUTOEMBED_PROVIDER) {
+                console.log('[AutoEmbed] Skipping fetch: Disabled by environment variable.');
+                return [];
+            }
+            if (!shouldFetch('autoembed')) {
+                console.log('[AutoEmbed] Skipping fetch: Not selected by user.');
+                return [];
+            }
+
+            // Try to get cached streams first
+            const cachedStreams = await getStreamFromCache('autoembed', tmdbTypeFromId, tmdbId, seasonNum, episodeNum);
+            if (cachedStreams) {
+                console.log(`[AutoEmbed] Using ${cachedStreams.length} streams from cache.`);
+                return cachedStreams.map(stream => ({ ...stream, provider: 'AutoEmbed' }));
+            }
+
+            // No cache or expired, fetch fresh
+            try {
+                console.log(`[AutoEmbed] Fetching Hindi/multi-language streams...`);
+                const streams = await getAutoEmbedStreams(tmdbId, tmdbTypeFromId, seasonNum, episodeNum);
+
+                if (streams && streams.length > 0) {
+                    console.log(`[AutoEmbed] Successfully fetched ${streams.length} streams.`);
+                    // Save to cache
+                    await saveStreamToCache('autoembed', tmdbTypeFromId, tmdbId, streams, 'ok', seasonNum, episodeNum);
+                    return streams.map(stream => ({ ...stream, provider: 'AutoEmbed' }));
+                } else {
+                    console.log(`[AutoEmbed] No streams returned.`);
+                    // Save empty result
+                    await saveStreamToCache('autoembed', tmdbTypeFromId, tmdbId, [], 'failed', seasonNum, episodeNum);
+                    return [];
+                }
+            } catch (err) {
+                console.error(`[AutoEmbed] Error fetching streams:`, err.message);
+                // Save error status to cache
+                await saveStreamToCache('autoembed', tmdbTypeFromId, tmdbId, [], 'failed', seasonNum, episodeNum);
+                return [];
+            }
         }
     };
 
@@ -1766,7 +1813,8 @@ builder.defineStreamHandler(async (args) => {
             timeProvider('HDHub4u', providerFetchFunctions.hdhub4u()),
             timeProvider('Vixsrc', providerFetchFunctions.vixsrc()),
             timeProvider('MovieBox', providerFetchFunctions.moviebox()),
-            timeProvider('VidKing', providerFetchFunctions.vidking())
+            timeProvider('VidKing', providerFetchFunctions.vidking()),
+            timeProvider('AutoEmbed', providerFetchFunctions.autoembed())
         ];
 
         // Implement proper timeout that returns results immediately after 10 seconds
@@ -1833,7 +1881,8 @@ builder.defineStreamHandler(async (args) => {
             'HDHub4u': ENABLE_HDHUB4U_PROVIDER && shouldFetch('hdhub4u') ? applyAllStreamFilters(providerResults[10], 'HDHub4u', minQualitiesPreferences.hdhub4u, excludeCodecsPreferences.hdhub4u) : [],
             'Vixsrc': ENABLE_VIXSRC_PROVIDER && shouldFetch('vixsrc') ? applyAllStreamFilters(providerResults[11], 'Vixsrc', minQualitiesPreferences.vixsrc, excludeCodecsPreferences.vixsrc) : [],
             'MovieBox': ENABLE_MOVIEBOX_PROVIDER && shouldFetch('moviebox') ? applyAllStreamFilters(providerResults[12], 'MovieBox', minQualitiesPreferences.moviebox, excludeCodecsPreferences.moviebox) : [],
-            'VidKing': ENABLE_VIDKING_PROVIDER && shouldFetch('vidking') ? applyAllStreamFilters(providerResults[13], 'VidKing', minQualitiesPreferences.vidking, excludeCodecsPreferences.vidking) : []
+            'VidKing': ENABLE_VIDKING_PROVIDER && shouldFetch('vidking') ? applyAllStreamFilters(providerResults[13], 'VidKing', minQualitiesPreferences.vidking, excludeCodecsPreferences.vidking) : [],
+            'AutoEmbed': ENABLE_AUTOEMBED_PROVIDER && shouldFetch('autoembed') ? applyAllStreamFilters(providerResults[14], 'AutoEmbed', minQualitiesPreferences.autoembed, excludeCodecsPreferences.autoembed) : []
         };
 
         // Sort streams for each provider by quality, then size
@@ -1853,7 +1902,7 @@ builder.defineStreamHandler(async (args) => {
 
         // Combine streams in the preferred provider order
         combinedRawStreams = [];
-        const providerOrder = ['ShowBox', 'MovieBox', 'VidKing', 'UHDMovies', '4KHDHub', 'HDHub4u', 'MoviesMod', 'TopMovies', 'MoviesDrive', 'Soaper TV', 'VidZee', 'MP4Hydra', 'VidSrc', 'Vixsrc'];
+        const providerOrder = ['ShowBox', 'AutoEmbed', 'MovieBox', 'VidKing', 'UHDMovies', '4KHDHub', 'HDHub4u', 'MoviesMod', 'TopMovies', 'MoviesDrive', 'Soaper TV', 'VidZee', 'MP4Hydra', 'VidSrc', 'Vixsrc'];
         providerOrder.forEach(providerKey => {
             if (streamsByProvider[providerKey] && streamsByProvider[providerKey].length > 0) {
                 combinedRawStreams.push(...streamsByProvider[providerKey]);
@@ -1924,6 +1973,20 @@ builder.defineStreamHandler(async (args) => {
                 name: stream.name,    // Use the name from the provider, e.g., "Nuvio | VidKing"
                 title: stream.title,  // Use the title from the provider, e.g., "🌟 VidKing • 4K HDR"
                 externalUrl: stream.externalUrl,  // VidKing uses externalUrl for embed links
+                type: 'url',
+                availability: 2,
+                behaviorHints: stream.behaviorHints || {
+                    notWebReady: true
+                }
+            };
+        }
+
+        // --- NEW: Special handling for AutoEmbed (Hindi/Multi-language embed provider) ---
+        if (stream.provider === 'AutoEmbed') {
+            return {
+                name: stream.name,    // Use the name from the provider, e.g., "Nuvio | AutoEmbed"
+                title: stream.title,  // Use the title with language info, e.g., "🇮🇳 AutoEmbed • Hindi Dubbed"
+                externalUrl: stream.externalUrl,  // AutoEmbed uses externalUrl for embed links
                 type: 'url',
                 availability: 2,
                 behaviorHints: stream.behaviorHints || {
