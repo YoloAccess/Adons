@@ -92,7 +92,7 @@ async function getAutoEmbedMovieStreams(tmdbId) {
         const urlHindi = buildMovieEmbedUrl(tmdbId, { language: 'hi' });
         streams.push({
             name: 'Nuvio | AutoEmbed',
-            title: `${LANGUAGE_OPTIONS['hindi'].emoji} AutoEmbed • Hindi Dubbed • HD`,
+            title: `${LANGUAGE_OPTIONS['hindi'].emoji} AutoEmbed 🌐 • Hindi Dubbed • HD`,
             quality: '1080p',
             language: 'Hindi',
             externalUrl: urlHindi,
@@ -110,7 +110,7 @@ async function getAutoEmbedMovieStreams(tmdbId) {
         const urlEnglish = buildMovieEmbedUrl(tmdbId, { language: 'en' });
         streams.push({
             name: 'Nuvio | AutoEmbed',
-            title: `${LANGUAGE_OPTIONS['english'].emoji} AutoEmbed • English • HD`,
+            title: `${LANGUAGE_OPTIONS['english'].emoji} AutoEmbed 🌐 • English • HD`,
             quality: '1080p',
             language: 'English',
             externalUrl: urlEnglish,
@@ -128,7 +128,7 @@ async function getAutoEmbedMovieStreams(tmdbId) {
         const urlTamil = buildMovieEmbedUrl(tmdbId, { language: 'ta' });
         streams.push({
             name: 'Nuvio | AutoEmbed',
-            title: `${LANGUAGE_OPTIONS['tamil'].emoji} AutoEmbed • Tamil • HD`,
+            title: `${LANGUAGE_OPTIONS['tamil'].emoji} AutoEmbed 🌐 • Tamil • HD`,
             quality: '1080p',
             language: 'Tamil',
             externalUrl: urlTamil,
@@ -146,7 +146,7 @@ async function getAutoEmbedMovieStreams(tmdbId) {
         const urlTelugu = buildMovieEmbedUrl(tmdbId, { language: 'te' });
         streams.push({
             name: 'Nuvio | AutoEmbed',
-            title: `${LANGUAGE_OPTIONS['telugu'].emoji} AutoEmbed • Telugu • HD`,
+            title: `${LANGUAGE_OPTIONS['telugu'].emoji} AutoEmbed 🌐 • Telugu • HD`,
             quality: '1080p',
             language: 'Telugu',
             externalUrl: urlTelugu,
@@ -164,7 +164,7 @@ async function getAutoEmbedMovieStreams(tmdbId) {
         const urlAuto = buildMovieEmbedUrl(tmdbId);
         streams.push({
             name: 'Nuvio | AutoEmbed',
-            title: `⚡ AutoEmbed • Auto (Best Available)`,
+            title: `⚡ AutoEmbed 🌐 • Auto (Best Available)`,
             quality: '1080p',
             language: 'Multi',
             externalUrl: urlAuto,
@@ -209,7 +209,7 @@ async function getAutoEmbedSeriesStreams(tmdbId, season, episode) {
         const urlHindi = buildSeriesEmbedUrl(tmdbId, season, episode, { language: 'hi' });
         streams.push({
             name: 'Nuvio | AutoEmbed',
-            title: `${LANGUAGE_OPTIONS['hindi'].emoji} AutoEmbed • Hindi • ${episodeTag}`,
+            title: `${LANGUAGE_OPTIONS['hindi'].emoji} AutoEmbed 🌐 • Hindi • ${episodeTag}`,
             quality: '1080p',
             language: 'Hindi',
             externalUrl: urlHindi,
@@ -227,7 +227,7 @@ async function getAutoEmbedSeriesStreams(tmdbId, season, episode) {
         const urlEnglish = buildSeriesEmbedUrl(tmdbId, season, episode, { language: 'en' });
         streams.push({
             name: 'Nuvio | AutoEmbed',
-            title: `${LANGUAGE_OPTIONS['english'].emoji} AutoEmbed • English • ${episodeTag}`,
+            title: `${LANGUAGE_OPTIONS['english'].emoji} AutoEmbed 🌐 • English • ${episodeTag}`,
             quality: '1080p',
             language: 'English',
             externalUrl: urlEnglish,
@@ -245,7 +245,7 @@ async function getAutoEmbedSeriesStreams(tmdbId, season, episode) {
         const urlTamil = buildSeriesEmbedUrl(tmdbId, season, episode, { language: 'ta' });
         streams.push({
             name: 'Nuvio | AutoEmbed',
-            title: `${LANGUAGE_OPTIONS['tamil'].emoji} AutoEmbed • Tamil • ${episodeTag}`,
+            title: `${LANGUAGE_OPTIONS['tamil'].emoji} AutoEmbed 🌐 • Tamil • ${episodeTag}`,
             quality: '1080p',
             language: 'Tamil',
             externalUrl: urlTamil,
@@ -263,7 +263,7 @@ async function getAutoEmbedSeriesStreams(tmdbId, season, episode) {
         const urlTelugu = buildSeriesEmbedUrl(tmdbId, season, episode, { language: 'te' });
         streams.push({
             name: 'Nuvio | AutoEmbed',
-            title: `${LANGUAGE_OPTIONS['telugu'].emoji} AutoEmbed • Telugu • ${episodeTag}`,
+            title: `${LANGUAGE_OPTIONS['telugu'].emoji} AutoEmbed 🌐 • Telugu • ${episodeTag}`,
             quality: '1080p',
             language: 'Telugu',
             externalUrl: urlTelugu,
@@ -281,7 +281,7 @@ async function getAutoEmbedSeriesStreams(tmdbId, season, episode) {
         const urlAuto = buildSeriesEmbedUrl(tmdbId, season, episode);
         streams.push({
             name: 'Nuvio | AutoEmbed',
-            title: `⚡ AutoEmbed • Auto • ${episodeTag}`,
+            title: `⚡ AutoEmbed 🌐 • Auto • ${episodeTag}`,
             quality: '1080p',
             language: 'Multi',
             externalUrl: urlAuto,

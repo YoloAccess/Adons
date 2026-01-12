@@ -168,7 +168,7 @@ async function getVidKingMovieStreams(tmdbId, imdbId = null) {
         });
         streams.push({
             name: 'Nuvio | VidKing',
-            title: `${QUALITY_OPTIONS['4k_hdr'].emoji} VidKing • 4K HDR • Dolby Vision`,
+            title: `${QUALITY_OPTIONS['4k_hdr'].emoji} VidKing • 4K HDR • 🌐 Browser`,
             quality: '4K HDR',
             externalUrl: url4kHdr,
             behaviorHints: {
@@ -189,7 +189,7 @@ async function getVidKingMovieStreams(tmdbId, imdbId = null) {
         });
         streams.push({
             name: 'Nuvio | VidKing',
-            title: `${QUALITY_OPTIONS['4k'].emoji} VidKing • 4K UHD • 2160p`,
+            title: `${QUALITY_OPTIONS['4k'].emoji} VidKing • 4K UHD • 🌐 Browser`,
             quality: '4K',
             externalUrl: url4k,
             behaviorHints: {
@@ -210,7 +210,7 @@ async function getVidKingMovieStreams(tmdbId, imdbId = null) {
         });
         streams.push({
             name: 'Nuvio | VidKing',
-            title: `${QUALITY_OPTIONS['1080p'].emoji} VidKing • 1080p • Full HD`,
+            title: `${QUALITY_OPTIONS['1080p'].emoji} VidKing • 1080p • 🌐 Browser`,
             quality: '1080p',
             externalUrl: url1080p,
             behaviorHints: {
@@ -231,7 +231,7 @@ async function getVidKingMovieStreams(tmdbId, imdbId = null) {
         });
         streams.push({
             name: 'Nuvio | VidKing',
-            title: `${QUALITY_OPTIONS['720p'].emoji} VidKing • 720p • HD`,
+            title: `${QUALITY_OPTIONS['720p'].emoji} VidKing • 720p • 🌐 Browser`,
             quality: '720p',
             externalUrl: url720p,
             behaviorHints: {
@@ -251,7 +251,7 @@ async function getVidKingMovieStreams(tmdbId, imdbId = null) {
         });
         streams.push({
             name: 'Nuvio | VidKing',
-            title: `${QUALITY_OPTIONS['auto'].emoji} VidKing • Auto Quality`,
+            title: `${QUALITY_OPTIONS['auto'].emoji} VidKing • Auto • 🌐 Browser`,
             quality: 'Auto',
             externalUrl: urlAuto,
             behaviorHints: {
@@ -303,7 +303,7 @@ async function getVidKingSeriesStreams(tmdbId, season, episode, imdbId = null) {
         });
         streams.push({
             name: 'Nuvio | VidKing',
-            title: `${QUALITY_OPTIONS['4k_hdr'].emoji} VidKing • 4K HDR • ${episodeTag}`,
+            title: `${QUALITY_OPTIONS['4k_hdr'].emoji} VidKing 🌐 • 4K HDR • ${episodeTag}`,
             quality: '4K HDR',
             externalUrl: url4kHdr,
             behaviorHints: {
@@ -326,7 +326,7 @@ async function getVidKingSeriesStreams(tmdbId, season, episode, imdbId = null) {
         });
         streams.push({
             name: 'Nuvio | VidKing',
-            title: `${QUALITY_OPTIONS['4k'].emoji} VidKing • 4K UHD • ${episodeTag}`,
+            title: `${QUALITY_OPTIONS['4k'].emoji} VidKing 🌐 • 4K UHD • ${episodeTag}`,
             quality: '4K',
             externalUrl: url4k,
             behaviorHints: {
@@ -349,7 +349,7 @@ async function getVidKingSeriesStreams(tmdbId, season, episode, imdbId = null) {
         });
         streams.push({
             name: 'Nuvio | VidKing',
-            title: `${QUALITY_OPTIONS['1080p'].emoji} VidKing • 1080p • ${episodeTag}`,
+            title: `${QUALITY_OPTIONS['1080p'].emoji} VidKing 🌐 • 1080p • ${episodeTag}`,
             quality: '1080p',
             externalUrl: url1080p,
             behaviorHints: {
@@ -372,7 +372,7 @@ async function getVidKingSeriesStreams(tmdbId, season, episode, imdbId = null) {
         });
         streams.push({
             name: 'Nuvio | VidKing',
-            title: `${QUALITY_OPTIONS['720p'].emoji} VidKing • 720p • ${episodeTag}`,
+            title: `${QUALITY_OPTIONS['720p'].emoji} VidKing 🌐 • 720p • ${episodeTag}`,
             quality: '720p',
             externalUrl: url720p,
             behaviorHints: {
@@ -394,7 +394,7 @@ async function getVidKingSeriesStreams(tmdbId, season, episode, imdbId = null) {
         });
         streams.push({
             name: 'Nuvio | VidKing',
-            title: `${QUALITY_OPTIONS['auto'].emoji} VidKing • Auto • ${episodeTag}`,
+            title: `${QUALITY_OPTIONS['auto'].emoji} VidKing 🌐 • Auto • ${episodeTag}`,
             quality: 'Auto',
             externalUrl: urlAuto,
             behaviorHints: {
