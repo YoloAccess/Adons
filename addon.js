@@ -186,6 +186,10 @@ console.log(`[addon.js] VidKing provider fetching enabled: ${ENABLE_VIDKING_PROV
 const ENABLE_AUTOEMBED_PROVIDER = process.env.ENABLE_AUTOEMBED_PROVIDER !== 'false'; // Defaults to true if not set or not 'false'
 console.log(`[addon.js] AutoEmbed (Hindi) provider fetching enabled: ${ENABLE_AUTOEMBED_PROVIDER}`);
 
+// NEW: Read environment variable for Torrent streams (YTS, EZTV, 1337x)
+const ENABLE_TORRENT_PROVIDER = process.env.ENABLE_TORRENT_PROVIDER !== 'false'; // Defaults to true if not set or not 'false'
+console.log(`[addon.js] Torrent provider fetching enabled: ${ENABLE_TORRENT_PROVIDER}`);
+
 // External provider service configuration
 const USE_EXTERNAL_PROVIDERS = process.env.USE_EXTERNAL_PROVIDERS === 'true';
 const EXTERNAL_UHDMOVIES_URL = USE_EXTERNAL_PROVIDERS ? process.env.EXTERNAL_UHDMOVIES_URL : null;
@@ -223,6 +227,7 @@ const { getVixsrcStreams } = require('./providers/vixsrc.js'); // NEW: Import fr
 const { getMovieBoxStreams } = require('./providers/moviebox.js'); // NEW: Import from moviebox.js
 const { getVidKingStreams } = require('./providers/vidking.js'); // NEW: Import from vidking.js
 const { getAutoEmbedStreams } = require('./providers/autoembed.js'); // NEW: Import AutoEmbed for Hindi streams
+const { getTorrentStreams } = require('./providers/torrent.js'); // NEW: Import Torrent provider (YTS, EZTV, 1337x)
 const axios = require('axios'); // For external provider requests
 
 // Helper function to make requests to external provider services
@@ -971,6 +976,7 @@ builder.defineStreamHandler(async (args) => {
             tmdbId = conversionResult.tmdbId;
             tmdbTypeFromId = conversionResult.tmdbType;
             initialTitleFromConversion = conversionResult.title; // Capture title from conversion
+            global.currentRequestImdbId = baseImdbId; // Store IMDB ID for torrent provider
             console.log(`  Successfully converted IMDb ID ${baseImdbId} to TMDB ${tmdbTypeFromId} ID ${tmdbId} (${initialTitleFromConversion || 'No title returned'})`);
         } else {
             console.log(`  Failed to convert IMDb ID ${baseImdbId} to TMDB ID.`);
@@ -1007,11 +1013,15 @@ builder.defineStreamHandler(async (args) => {
             if (tmdbTypeFromId === 'movie') {
                 if (!movieOrSeriesTitle) movieOrSeriesTitle = tmdbDetails.title;
                 movieOrSeriesYear = tmdbDetails.release_date ? tmdbDetails.release_date.substring(0, 4) : null;
+                // Store IMDB ID for torrent provider (movies have direct imdb_id)
+                if (tmdbDetails.imdb_id && !global.currentRequestImdbId) {
+                    global.currentRequestImdbId = tmdbDetails.imdb_id;
+                }
             } else { // 'tv'
                 if (!movieOrSeriesTitle) movieOrSeriesTitle = tmdbDetails.name;
                 movieOrSeriesYear = tmdbDetails.first_air_date ? tmdbDetails.first_air_date.substring(0, 4) : null;
             }
-            console.log(`  Fetched/Confirmed TMDB details: Title='${movieOrSeriesTitle}', Year='${movieOrSeriesYear}'`);
+            console.log(`  Fetched/Confirmed TMDB details: Title='${movieOrSeriesTitle}', Year='${movieOrSeriesYear}'${global.currentRequestImdbId ? `, IMDB='${global.currentRequestImdbId}'` : ''}`);
 
             // NEW: Fetch season-specific title for TV shows
             if (tmdbTypeFromId === 'tv' && seasonNum) {
@@ -1790,6 +1800,56 @@ builder.defineStreamHandler(async (args) => {
                 await saveStreamToCache('autoembed', tmdbTypeFromId, tmdbId, [], 'failed', seasonNum, episodeNum);
                 return [];
             }
+        },
+
+        // Torrent provider with cache integration (YTS, EZTV, 1337x)
+        torrent: async () => {
+            if (!ENABLE_TORRENT_PROVIDER) {
+                console.log('[Torrent] Skipping fetch: Disabled by environment variable.');
+                return [];
+            }
+            if (!shouldFetch('torrent')) {
+                console.log('[Torrent] Skipping fetch: Not selected by user.');
+                return [];
+            }
+
+            // Try to get cached streams first
+            const cachedStreams = await getStreamFromCache('torrent', tmdbTypeFromId, tmdbId, seasonNum, episodeNum);
+            if (cachedStreams) {
+                console.log(`[Torrent] Using ${cachedStreams.length} streams from cache.`);
+                return cachedStreams.map(stream => ({ ...stream, provider: 'Torrent' }));
+            }
+
+            // No cache or expired, fetch fresh
+            try {
+                console.log(`[Torrent] Fetching torrent streams...`);
+                // Use IMDB ID if available, otherwise use title
+                const streams = await getTorrentStreams(
+                    global.currentRequestImdbId || null,
+                    movieOrSeriesTitle || null,
+                    tmdbTypeFromId,
+                    movieOrSeriesYear || null,
+                    seasonNum,
+                    episodeNum
+                );
+
+                if (streams && streams.length > 0) {
+                    console.log(`[Torrent] Successfully fetched ${streams.length} streams.`);
+                    // Save to cache
+                    await saveStreamToCache('torrent', tmdbTypeFromId, tmdbId, streams, 'ok', seasonNum, episodeNum);
+                    return streams.map(stream => ({ ...stream, provider: 'Torrent' }));
+                } else {
+                    console.log(`[Torrent] No streams returned.`);
+                    // Save empty result
+                    await saveStreamToCache('torrent', tmdbTypeFromId, tmdbId, [], 'failed', seasonNum, episodeNum);
+                    return [];
+                }
+            } catch (err) {
+                console.error(`[Torrent] Error fetching streams:`, err.message);
+                // Save error status to cache
+                await saveStreamToCache('torrent', tmdbTypeFromId, tmdbId, [], 'failed', seasonNum, episodeNum);
+                return [];
+            }
         }
     };
 
@@ -1814,7 +1874,8 @@ builder.defineStreamHandler(async (args) => {
             timeProvider('Vixsrc', providerFetchFunctions.vixsrc()),
             timeProvider('MovieBox', providerFetchFunctions.moviebox()),
             timeProvider('VidKing', providerFetchFunctions.vidking()),
-            timeProvider('AutoEmbed', providerFetchFunctions.autoembed())
+            timeProvider('AutoEmbed', providerFetchFunctions.autoembed()),
+            timeProvider('Torrent', providerFetchFunctions.torrent())
         ];
 
         // Implement proper timeout that returns results immediately after 10 seconds
@@ -1882,7 +1943,8 @@ builder.defineStreamHandler(async (args) => {
             'Vixsrc': ENABLE_VIXSRC_PROVIDER && shouldFetch('vixsrc') ? applyAllStreamFilters(providerResults[11], 'Vixsrc', minQualitiesPreferences.vixsrc, excludeCodecsPreferences.vixsrc) : [],
             'MovieBox': ENABLE_MOVIEBOX_PROVIDER && shouldFetch('moviebox') ? applyAllStreamFilters(providerResults[12], 'MovieBox', minQualitiesPreferences.moviebox, excludeCodecsPreferences.moviebox) : [],
             'VidKing': ENABLE_VIDKING_PROVIDER && shouldFetch('vidking') ? applyAllStreamFilters(providerResults[13], 'VidKing', minQualitiesPreferences.vidking, excludeCodecsPreferences.vidking) : [],
-            'AutoEmbed': ENABLE_AUTOEMBED_PROVIDER && shouldFetch('autoembed') ? applyAllStreamFilters(providerResults[14], 'AutoEmbed', minQualitiesPreferences.autoembed, excludeCodecsPreferences.autoembed) : []
+            'AutoEmbed': ENABLE_AUTOEMBED_PROVIDER && shouldFetch('autoembed') ? applyAllStreamFilters(providerResults[14], 'AutoEmbed', minQualitiesPreferences.autoembed, excludeCodecsPreferences.autoembed) : [],
+            'Torrent': ENABLE_TORRENT_PROVIDER && shouldFetch('torrent') ? providerResults[15] || [] : []
         };
 
         // Sort streams for each provider by quality, then size
@@ -1902,7 +1964,7 @@ builder.defineStreamHandler(async (args) => {
 
         // Combine streams in the preferred provider order
         combinedRawStreams = [];
-        const providerOrder = ['ShowBox', 'AutoEmbed', 'MovieBox', 'VidKing', 'UHDMovies', '4KHDHub', 'HDHub4u', 'MoviesMod', 'TopMovies', 'MoviesDrive', 'Soaper TV', 'VidZee', 'MP4Hydra', 'VidSrc', 'Vixsrc'];
+        const providerOrder = ['Torrent', 'ShowBox', 'AutoEmbed', 'MovieBox', 'VidKing', 'UHDMovies', '4KHDHub', 'HDHub4u', 'MoviesMod', 'TopMovies', 'MoviesDrive', 'Soaper TV', 'VidZee', 'MP4Hydra', 'VidSrc', 'Vixsrc'];
         providerOrder.forEach(providerKey => {
             if (streamsByProvider[providerKey] && streamsByProvider[providerKey].length > 0) {
                 combinedRawStreams.push(...streamsByProvider[providerKey]);
@@ -1991,6 +2053,21 @@ builder.defineStreamHandler(async (args) => {
                 availability: 2,
                 behaviorHints: stream.behaviorHints || {
                     notWebReady: true
+                }
+            };
+        }
+
+        // --- NEW: Special handling for Torrent streams (YTS, EZTV, 1337x) ---
+        if (stream.provider === 'Torrent') {
+            return {
+                name: stream.name,    // e.g., "Nuvio | YTS" or "Nuvio | EZTV"
+                title: stream.title,  // e.g., "🌟 YTS • 4K • BluRay\n📦 2.5 GB • 🌱 1500 seeds"
+                infoHash: stream.infoHash,  // Torrent info hash for direct playback
+                type: 'torrent',  // IMPORTANT: Type must be 'torrent' for Stremio
+                sources: stream.url ? [stream.url] : undefined,  // Optional magnet URL
+                seeds: stream.seeds,
+                behaviorHints: stream.behaviorHints || {
+                    bingeGroup: stream.behaviorHints?.bingeGroup
                 }
             };
         }
