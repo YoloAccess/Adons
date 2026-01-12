@@ -1,0 +1,372 @@
+npm warn Unknown project config "puppeteer_skip_chromium_download". This will stop working in the next major version of npm.
+
+> nuvio-streaming-addon@0.5.13 start
+> node server.js
+
+[addon.js] VidZee provider fetching enabled: true
+[addon.js] MP4Hydra provider fetching enabled: true
+[addon.js] UHDMovies provider fetching enabled: true
+[addon.js] MoviesMod provider fetching enabled: true
+[addon.js] TopMovies provider fetching enabled: true
+[addon.js] SoaperTV provider fetching enabled: true
+[addon.js] MoviesDrive provider fetching enabled: true
+[addon.js] 4KHDHub provider fetching enabled: true
+[addon.js] HDHub4u provider fetching enabled: true
+[addon.js] Vixsrc provider fetching enabled: true
+[addon.js] MovieBox provider fetching enabled: true
+[addon.js] VidKing provider fetching enabled: true
+[addon.js] AutoEmbed (Hindi) provider fetching enabled: true
+[addon.js] Torrent provider fetching enabled: true
+[addon.js] External providers: disabled
+[addon.js] All providers will use local implementations
+[addon.js] Stream links caching enabled
+[addon.js] Redis caching not available
+[UHDMovies] No proxy configured, using direct connections
+[UHDMovies] Internal cache is enabled.
+[UHDMovies Cache] Redis cache is disabled (USE_REDIS_CACHE is not 'true'). Using file system cache only.
+[UHDMovies] URL validation is enabled.
+[MoviesMod] No proxy configured, using direct connections
+[MoviesMod Cache] Internal cache is enabled.
+[MoviesMod Cache] Redis cache is disabled (USE_REDIS_CACHE is not 'true'). Using file system cache only.
+[MoviesMod] URL validation is enabled.
+[TopMovies] No proxy configured
+[TopMovies] URL validation is enabled.
+[TopMovies Cache] Redis cache is disabled (USE_REDIS_CACHE is not 'true'). Using file system cache only.
+[MoviesDrive] Internal cache is enabled.
+[MoviesDrive Cache] Redis cache is disabled (USE_REDIS_CACHE is not 'true'). Using file system cache only.
+[4KHDHub Cache] Redis cache is disabled (USE_REDIS_CACHE is not 'true'). Using file system cache only.
+[HDHub4u Cache] Internal cache is enabled.
+[HDHub4u Cache] Redis cache is disabled (USE_REDIS_CACHE is not 'true'). Using file system cache only.
+[HDHub4u] No proxy configured, using direct connections
+[Analytics] GA4 Measurement Protocol is disabled. Set GA_MEASUREMENT_ID and GA_API_SECRET to enable.
+Using proxy/direct mode with Showbox.js
+Nuvio Streams Addon landing page available at http://localhost:7777
+Default Addon Manifest available at: http://localhost:7777/manifest.json
+To generate a personalized manifest, append ?cookie=YOUR_URL_ENCODED_COOKIE to the manifest URL.
+Example: http://localhost:7777/manifest.json?cookie=ui%3Dyourcookievalue
+Install example: stremio://localhost:7777/manifest.json?cookie=ui%3Dyourcookievalue
+[Stream Cache] Cache directory ensured at C:\Users\rames\Downloads\New folder (6)\.streams_cache
+Incoming request: /stream/movie/tt0133093.json
+[addon.js] Read from global.currentRequestConfig: {}
+[addon.js] No minimum quality preferences set by user.
+[addon.js] No codec exclude preferences set by user.
+--- FULL ARGS OBJECT (from SDK) ---
+{
+  "type": "movie",
+  "id": "tt0133093",
+  "extra": {},
+  "config": {}
+}
+--- SDK ARGS.CONFIG (still logging for comparison) ---
+{}
+---------------------------------
+Stream request for Stremio type: 'movie', id: 'tt0133093'
+Effective request details: {"regionPreference":"none","hasCookie":false,"cookieCount":0,"selectedProviders":"all"}
+[addon.js] No region preference found in global config.
+[addon.js] No cookie found in global config.
+[addon.js] No specific providers selected by user in global config, will attempt all.
+  Received IMDb ID: tt0133093. Attempting to convert to TMDB ID.
+  Attempting to convert IMDb ID: tt0133093 to TMDB ID (expected type: movie).
+    Fetching from TMDB find API: https://api.themoviedb.org/3/find/tt0133093?api_key=439c478a771f35c05022f9feabcca01c&external_source=imdb_id
+convertImdbToTmdb_apiCall_tt0133093: 10.041s
+    Error during TMDB find API call for IMDb ID tt0133093: timeout of 10000ms exceeded
+convertImdbToTmdb_total_tt0133093: 10.042s
+  Failed to convert IMDb ID tt0133093 to TMDB ID. Entering fallback mode for providers supporting IMDb ID.
+TMDB_API_KEY is not configured. Cannot fetch full title/year/genres.
+[Stream Cache] Checking cache for all enabled providers...
+Running parallel provider fetches with caching...
+[ShowBox] Fetching new streams...
+[ShowBox] Attempt 1/3
+[ShowBox] Getting streams for TMDB movie/tt0133093
+[ShowBox] Making request to: https://febapi.nuvioapp.space/api/media/movie/tt0133093/oss=USA7
+[SoaperTV] Fetching new streams...
+[Soaper TV] Attempting to fetch streams for TMDB ID: tt0133093, Type: movie
+[Soaper TV] Fetching TMDB info from: https://api.themoviedb.org/3/movie/tt0133093?api_key=439c478a771f35c05022f9feabcca01c
+[VidSrc] Fetching new streams...
+[VidSrc] Attempting to fetch streams for TMDB ID: tt0133093, Type: movie, Season: null, Episode: null
+[VidSrc Direct] Fetching: https://vidsrc.xyz/embed/movie/tt0133093
+[VidZee] Fetching new streams...
+[VidZee] Fetching from server 3: https://player.vidzee.wtf/api/server?id=tt0133093&sr=3
+[VidZee] Fetching from server 4: https://player.vidzee.wtf/api/server?id=tt0133093&sr=4
+[VidZee] Fetching from server 5: https://player.vidzee.wtf/api/server?id=tt0133093&sr=5
+[MP4Hydra] Fetching new streams...
+[MP4Hydra] Fetching streams for TMDB ID: tt0133093, Type: movie, Season: null, Episode: null
+[MP4Hydra] Fetching movie details for TMDB ID: tt0133093
+[UHDMovies] Fetching new streams...
+[UHDMovies] Using local provider
+[UHDMovies] Attempting to fetch streams for TMDB ID: tt0133093, Type: movie
+[MoviesMod] Fetching new streams...
+[MoviesMod] Using local provider
+[MoviesMod] Fetching streams for TMDB movie/tt0133093
+[TopMovies] Fetching new streams...
+[TopMovies] Using local provider
+[TopMovies] Attempting to fetch streams for TMDB ID: tt0133093
+[MoviesDrive] Fetching new streams...
+[MoviesDrive] Fetching streams for TMDB ID: tt0133093, Type: movie
+[4KHDHub] Fetching new streams...
+[4KHDHub] Fetching TMDB details from: https://api.themoviedb.org/3/movie/tt0133093?api_key=439c478a771f35c05022f9feabcca01c
+[HDHub4u] Fetching new streams...
+[HDHub4u] ===== STARTING STREAM FETCH =====
+[HDHub4u] Fetching streams for "null" (null) - TMDB movie/tt0133093
+[HDHub4u] TMDB ID: tt0133093
+[HDHub4u] Current domain: https://hdhub4u.frl
+[Vixsrc] Fetching new streams...
+[Vixsrc] Fetching streams for TMDB ID: tt0133093, Type: movie
+[MovieBox] Fetching new streams...
+[MovieBox] Fetching streams for TMDB ID: tt0133093, Type: movie
+[VidKing] Fetching new streams...
+[VidKing] Fetching movie streams for TMDB: tt0133093
+[VidKing] Found 5 movie streams (including 4K/HDR options)
+[VidKing] Successfully fetched 5 streams.
+[AutoEmbed] Fetching Hindi/multi-language streams...
+[AutoEmbed] Fetching Hindi/multi-language movie streams for TMDB: tt0133093
+[AutoEmbed] Found 5 movie streams (Hindi, English, Tamil, Telugu)
+[AutoEmbed] Successfully fetched 5 streams.
+[Torrent] Fetching torrent streams...
+[Torrents] Fetching movie torrents for: null (null)
+[YTS] Searching for movie: tt0133093
+[TorrentGalaxy] Searching for: null
+[APIBay] Searching for: null
+[BitSearch] Searching for: null
+[1337x] Searching for: null
+[UHDMovies Cache] FILE SYSTEM CACHE MISS for: uhd_final_v22_tt0133093_movie
+[UHDMovies] Cache MISS for uhd_final_v22_tt0133093_movie. Fetching from source.
+[UHDMovies] Cache MISS for uhd_final_v22_tt0133093_movie. Fetching from source.
+[MoviesMod Cache] FILE SYSTEM CACHE MISS for: moviesmod_final_v17_tt0133093_movie
+[MoviesMod Cache] MISS for key: moviesmod_final_v17_tt0133093_movie. Fetching from source.
+[TopMovies Cache] FILE SYSTEM CACHE MISS for: topmovies_final_v16_tt0133093
+[TopMovies Cache] MISS for key: topmovies_final_v16_tt0133093. Fetching from source.
+[TopMovies Cache] MISS for key: topmovies_final_v16_tt0133093. Fetching from source.
+[MoviesDrive Cache] FILE SYSTEM CACHE MISS for: tmdb_movie_tt0133093
+[MoviesDrive] Cache miss for TMDB metadata: tmdb_movie_tt0133093
+[MoviesDrive] TMDB API key not found, using TMDB ID only
+[File Cache] SAVED for vidking: streams_vidking_movie_tt0133093.json (5 streams, status: ok, TTL: 21600s)
+[File Cache] SAVED for autoembed: streams_autoembed_movie_tt0133093.json (5 streams, status: ok, TTL: 21600s)
+[MoviesDrive Cache] SAVED TO FILE SYSTEM CACHE: tmdb_movie_tt0133093
+[MoviesDrive] Could not fetch metadata for TMDB ID: tt0133093
+[MoviesDrive] No streams returned.
+[File Cache] SAVED for moviesdrive: streams_moviesdrive_movie_tt0133093.json (0 streams, status: failed, TTL: 21600s)
+[HDHub4u] Updating domain from https://hdhub4u.frl to https://new1.hdhub4u.fo
+[HDHub4u] Cache key: hdhub4u_final_v1_movie_tt0133093
+[HDHub4u Cache] FILE SYSTEM CACHE MISS for: hdhub4u_final_v1_movie_tt0133093
+[HDHub4u Cache] MISS for key: hdhub4u_final_v1_movie_tt0133093
+[HDHub4u] No title provided for movie/tt0133093
+[HDHub4u] No streams returned.
+[File Cache] SAVED for hdhub4u: streams_hdhub4u_movie_tt0133093.json (0 streams, status: failed, TTL: 21600s)
+[APIBay] Found 10 torrents
+[VidZee S5] Error fetching: 404 Not Found
+[VidZee S4] Error fetching: 404 Not Found
+[VidZee S3] Error fetching: 404 Not Found
+[VidZee] Found a total of 0 streams from servers 3, 4, 5.
+[VidZee] No streams returned.
+[File Cache] SAVED for vidzee: streams_vidzee_movie_tt0133093.json (0 streams, status: failed, TTL: 21600s)
+getStreamsFromTmdbId_total_movie_tt0133093: 7.240s
+[ShowBox] No streams returned for TMDB movie/tt0133093 on attempt 1
+[ShowBox] Waiting 1000ms before retry...
+[ShowBox] Error fetching streams: Request failed with status code 500 (Status: 500)
+[ShowBox] Response data: {"success":false,"error":"UI cookie is required. Please provide cookie parameter in your request."}
+[ShowBox] Attempt 2/3
+[ShowBox] Getting streams for TMDB movie/tt0133093
+[ShowBox] Making request to: https://febapi.nuvioapp.space/api/media/movie/tt0133093/oss=USA7
+[ShowBox] Error fetching streams: Request failed with status code 500 (Status: 500)
+[ShowBox] Response data: {"success":false,"error":"UI cookie is required. Please provide cookie parameter in your request."}
+getStreamsFromTmdbId_total_movie_tt0133093: 1.163s
+[ShowBox] No streams returned for TMDB movie/tt0133093 on attempt 2
+[ShowBox] Waiting 2000ms before retry...
+[Retry] Retrying https://yts.mx/api/v2/list_movies.json?query_term=tt0133093 (3 attempts left)...
+[Retry] Retrying https://torrentgalaxy.to/torrents.php?search=null&sort=seeders&order=desc (3 attempts left)...
+[Retry] Retrying https://bitsearch.to/search?q=null (3 attempts left)...
+[Retry] Retrying https://1337x.to/category-search/null/Movies/1/ (3 attempts left)...
+[VidSrc] No streams returned.
+[VidSrc] Error fetching streams: fetch failed
+[MovieBox] Error in getMovieBoxStreams: fetch failed
+[MovieBox] No streams returned.
+[Vixsrc] Request failed for https://api.themoviedb.org/3/movie/tt0133093?api_key=68e094699525b18a70bab2f86b1fa706: fetch failed
+[Vixsrc] No streams returned.
+[Vixsrc] Error in getVixsrcStreams: fetch failed
+[File Cache] SAVED for vidsrc: streams_vidsrc_movie_tt0133093.json (0 streams, status: failed, TTL: 21600s)
+[File Cache] SAVED for moviebox: streams_moviebox_movie_tt0133093.json (0 streams, status: failed, TTL: 21600s)
+[File Cache] SAVED for vixsrc: streams_vixsrc_movie_tt0133093.json (0 streams, status: failed, TTL: 21600s)
+[ShowBox] Attempt 3/3
+[ShowBox] Getting streams for TMDB movie/tt0133093
+[ShowBox] Making request to: https://febapi.nuvioapp.space/api/media/movie/tt0133093/oss=USA7
+[ShowBox] Error fetching streams: Request failed with status code 500 (Status: 500)
+[ShowBox] Response data: {"success":false,"error":"UI cookie is required. Please provide cookie parameter in your request."}
+getStreamsFromTmdbId_total_movie_tt0133093: 1.327s
+[ShowBox] No streams returned for TMDB movie/tt0133093 on attempt 3
+[ShowBox] All 3 attempts failed. Last error: Unknown error
+[Timeout] 30-second timeout reached. Returning fetched links so far.
+[Timeout] Collecting results from completed providers...
+[Timeout] Provider ShowBox returned no streams.
+[Timeout] Provider Soaper TV returned no streams.
+[Timeout] Provider VidSrc returned no streams.
+[Timeout] Provider VidZee returned no streams.
+[Timeout] Provider MP4Hydra returned no streams.
+[Timeout] Provider UHDMovies returned no streams.
+[Timeout] Provider MoviesMod returned no streams.
+[Timeout] Provider TopMovies returned no streams.
+[Timeout] Provider MoviesDrive returned no streams.
+[Timeout] Provider 4KHDHub returned no streams.
+[Timeout] Provider HDHub4u returned no streams.
+[Timeout] Provider Vixsrc returned no streams.
+[Timeout] Provider MovieBox returned no streams.
+[Timeout] Provider VidKing completed with 5 streams.
+[Timeout] Provider AutoEmbed completed with 5 streams.
+[Timeout] Provider Torrent returned no streams.
+[ShowBox] No minimum quality filter applied (set to 'all' or not specified).
+[ShowBox] No codec exclusions applied.
+[Soaper TV] No minimum quality filter applied (set to 'all' or not specified).
+[Soaper TV] No codec exclusions applied.
+[VidSrc] No minimum quality filter applied (set to 'all' or not specified).
+[VidSrc] No codec exclusions applied.
+[VidZee] No minimum quality filter applied (set to 'all' or not specified).
+[VidZee] No codec exclusions applied.
+[MP4Hydra] No minimum quality filter applied (set to 'all' or not specified).
+[MP4Hydra] No codec exclusions applied.
+[UHDMovies] No minimum quality filter applied (set to 'all' or not specified).
+[UHDMovies] No codec exclusions applied.
+[MoviesMod] No minimum quality filter applied (set to 'all' or not specified).
+[MoviesMod] No codec exclusions applied.
+[TopMovies] No minimum quality filter applied (set to 'all' or not specified).
+[TopMovies] No codec exclusions applied.
+[MoviesDrive] No minimum quality filter applied (set to 'all' or not specified).
+[MoviesDrive] No codec exclusions applied.
+[4KHDHub] No minimum quality filter applied (set to 'all' or not specified).
+[4KHDHub] No codec exclusions applied.
+[HDHub4u] No minimum quality filter applied (set to 'all' or not specified).
+[HDHub4u] No codec exclusions applied.
+[Vixsrc] No minimum quality filter applied (set to 'all' or not specified).
+[Vixsrc] No codec exclusions applied.
+[MovieBox] No minimum quality filter applied (set to 'all' or not specified).
+[MovieBox] No codec exclusions applied.
+[VidKing] No minimum quality filter applied (set to 'all' or not specified).
+[VidKing] No codec exclusions applied.
+[AutoEmbed] No minimum quality filter applied (set to 'all' or not specified).
+[AutoEmbed] No codec exclusions applied.
+Sorting streams for each provider by quality, then size...
+Total raw streams after provider-ordered fetch: 10
+Total streams after provider-level sorting: 10
+--- BEGIN Stremio Stream Objects to be sent ---
+[
+  {
+    "name": "Nuvio | AutoEmbed",
+    "title": "≡ƒç«≡ƒç│ AutoEmbed ≡ƒîÉ ΓÇó Hindi Dubbed ΓÇó HD",
+    "externalUrl": "https://player.autoembed.cc/embed/movie/tt0133093?language=hi",
+    "type": "url",
+    "availability": 2,
+    "behaviorHints": {
+      "notWebReady": true,
+      "proxyHeaders": {
+        "request": {
+          "Referer": "https://player.autoembed.cc"
+        }
+      }
+    }
+  },
+  {
+    "name": "Nuvio | AutoEmbed",
+    "title": "≡ƒç║≡ƒç╕ AutoEmbed ≡ƒîÉ ΓÇó English ΓÇó HD",
+    "externalUrl": "https://player.autoembed.cc/embed/movie/tt0133093?language=en",
+    "type": "url",
+    "availability": 2,
+    "behaviorHints": {
+      "notWebReady": true,
+      "proxyHeaders": {
+        "request": {
+          "Referer": "https://player.autoembed.cc"
+        }
+      }
+    }
+  },
+  {
+    "name": "Nuvio | AutoEmbed",
+    "title": "≡ƒç«≡ƒç│ AutoEmbed ≡ƒîÉ ΓÇó Tamil ΓÇó HD",
+    "externalUrl": "https://player.autoembed.cc/embed/movie/tt0133093?language=ta",
+    "type": "url",
+    "availability": 2,
+    "behaviorHints": {
+      "notWebReady": true,
+      "proxyHeaders": {
+        "request": {
+          "Referer": "https://player.autoembed.cc"
+        }
+      }
+    }
+  }
+]
+... and 7 more streams
+--- END Stremio Stream Objects to be sent ---
+Request for tt0133093 completed successfully
+--- Request Timings Summary ---
+{
+  "VidKing": "29ms",
+  "AutoEmbed": "29ms",
+  "MoviesDrive": "30ms",
+  "HDHub4u": "975ms",
+  "VidZee": "5.77s",
+  "VidSrc": "10.64s",
+  "MovieBox": "10.64s",
+  "Vixsrc": "10.64s",
+  "ShowBox": "12.74s"
+}
+Total Request Time: 25.17s
+-------------------------------
+[server.js] Cleared cookie and region preference after request processing
+[Retry] Retrying https://yts.mx/api/v2/list_movies.json?query_term=tt0133093 (2 attempts left)...
+[Retry] Retrying https://torrentgalaxy.to/torrents.php?search=null&sort=seeders&order=desc (2 attempts left)...
+[Retry] Retrying https://bitsearch.to/search?q=null (2 attempts left)...
+[Retry] Retrying https://1337x.to/category-search/null/Movies/1/ (2 attempts left)...
+[SoaperTV] No streams returned.
+[Soaper TV] Error in getSoaperTvStreams for TMDB ID tt0133093: request to https://api.themoviedb.org/3/movie/tt0133093?api_key=439c478a771f35c05022f9feabcca01c failed, reason: connect ETIMEDOUT 49.44.79.236:443 FetchError: request to https://api.themoviedb.org/3/movie/tt0133093?api_key=439c478a771f35c05022f9feabcca01c failed, reason: connect ETIMEDOUT 49.44.79.236:443
+    at ClientRequest.<anonymous> (C:\Users\rames\Downloads\New folder (6)\node_modules\node-fetch\lib\index.js:1501:11)
+    at ClientRequest.emit (node:events:518:28)
+    at emitErrorEvent (node:_http_client:104:11)
+    at TLSSocket.socketErrorListener (node:_http_client:518:5)
+    at TLSSocket.emit (node:events:518:28)
+    at emitErrorNT (node:internal/streams/destroy:170:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:129:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+[File Cache] SAVED for soapertv: streams_soapertv_movie_tt0133093.json (0 streams, status: failed, TTL: 21600s)
+[4KHDHub] TMDB request failed: connect ETIMEDOUT 49.44.79.236:443
+[4KHDHub] No streams returned.
+[MP4Hydra] Error fetching details from TMDB: connect ETIMEDOUT 49.44.79.236:443
+[MP4Hydra] Could not fetch details for TMDB ID: tt0133093
+[MP4Hydra] No streams returned.
+[File Cache] SAVED for 4khdhub: streams_4khdhub_movie_tt0133093.json (0 streams, status: failed, TTL: 21600s)
+[File Cache] SAVED for mp4hydra: streams_mp4hydra_movie_tt0133093.json (0 streams, status: failed, TTL: 21600s)
+[UHDMovies] A critical error occurred in getUHDMoviesStreams for tt0133093: connect ETIMEDOUT 49.44.79.236:443
+Error: connect ETIMEDOUT 49.44.79.236:443
+    at AxiosError.from (C:\Users\rames\Downloads\New folder (6)\node_modules\axios\dist\node\axios.cjs:863:14)
+    at RedirectableRequest.handleRequestError (C:\Users\rames\Downloads\New folder (6)\node_modules\axios\dist\node\axios.cjs:3187:25)
+    at RedirectableRequest.emit (node:events:518:28)
+    at eventHandlers.<computed> (C:\Users\rames\Downloads\New folder (6)\node_modules\follow-redirects\index.js:49:24)
+    at ClientRequest.emit (node:events:518:28)
+    at emitErrorEvent (node:_http_client:104:11)
+    at TLSSocket.socketErrorListener (node:_http_client:518:5)
+    at TLSSocket.emit (node:events:518:28)
+    at emitErrorNT (node:internal/streams/destroy:170:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:129:3)
+    at Axios.request (C:\Users\rames\Downloads\New folder (6)\node_modules\axios\dist\node\axios.cjs:4276:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getUHDMoviesStreams (C:\Users\rames\Downloads\New folder (6)\providers\uhdmovies.js:1448:28)
+    at async Object.uhdmovies (C:\Users\rames\Downloads\New folder (6)\addon.js:1398:31)
+    at async timeProvider (C:\Users\rames\Downloads\New folder (6)\addon.js:1102:24)
+[UHDMovies] No streams returned.
+[File Cache] SAVED for uhdmovies: streams_uhdmovies_movie_tt0133093.json (0 streams, status: failed, TTL: 21600s)
+[TopMovies] No streams returned.
+[TopMovies] A critical error occurred for TMDB ID tt0133093: connect ETIMEDOUT 49.44.79.236:443
+[MoviesMod] Error getting streams: request to https://api.themoviedb.org/3/movie/tt0133093?api_key=439c478a771f35c05022f9feabcca01c&language=en-US failed, reason: connect ETIMEDOUT 49.44.79.236:443
+[MoviesMod] No streams returned.
+[File Cache] SAVED for topmovies: streams_topmovies_movie_tt0133093.json (0 streams, status: failed, TTL: 21600s)
+[File Cache] SAVED for moviesmod: streams_moviesmod_movie_tt0133093.json (0 streams, status: failed, TTL: 21600s)
+[Retry] Retrying https://yts.mx/api/v2/list_movies.json?query_term=tt0133093 (1 attempts left)...
+[Retry] Retrying https://torrentgalaxy.to/torrents.php?search=null&sort=seeders&order=desc (1 attempts left)...
+[Retry] Retrying https://bitsearch.to/search?q=null (1 attempts left)...
+[Retry] Retrying https://1337x.to/category-search/null/Movies/1/ (1 attempts left)...
+[YTS] Error: timeout of 10000ms exceeded
+[TorrentGalaxy] Error: timeout of 10000ms exceeded
+[BitSearch] Error: timeout of 10000ms exceeded
+[1337x] Error: timeout of 10000ms exceeded
+[Torrents] Total movie torrents: 10
+[Torrent] Successfully fetched 10 streams.
+[File Cache] SAVED for torrent: streams_torrent_movie_tt0133093.json (10 streams, status: ok, TTL: 21600s)

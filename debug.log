@@ -1,0 +1,75 @@
+npm warn Unknown project config "puppeteer_skip_chromium_download". This will stop working in the next major version of npm.
+
+> nuvio-streaming-addon@0.5.13 start
+> node server.js
+
+[addon.js] VidZee provider fetching enabled: true
+[addon.js] MP4Hydra provider fetching enabled: true
+[addon.js] UHDMovies provider fetching enabled: true
+[addon.js] MoviesMod provider fetching enabled: true
+[addon.js] TopMovies provider fetching enabled: true
+[addon.js] SoaperTV provider fetching enabled: true
+[addon.js] MoviesDrive provider fetching enabled: true
+[addon.js] 4KHDHub provider fetching enabled: true
+[addon.js] HDHub4u provider fetching enabled: true
+[addon.js] Vixsrc provider fetching enabled: true
+[addon.js] MovieBox provider fetching enabled: true
+[addon.js] VidKing provider fetching enabled: true
+[addon.js] AutoEmbed (Hindi) provider fetching enabled: true
+[addon.js] Torrent provider fetching enabled: true
+[addon.js] External providers: disabled
+[addon.js] All providers will use local implementations
+[addon.js] Stream links caching enabled
+[addon.js] Redis caching not available
+[UHDMovies] No proxy configured, using direct connections
+[UHDMovies] Internal cache is enabled.
+[UHDMovies Cache] Redis cache is disabled (USE_REDIS_CACHE is not 'true'). Using file system cache only.
+[UHDMovies] URL validation is enabled.
+[MoviesMod] No proxy configured, using direct connections
+[MoviesMod Cache] Internal cache is enabled.
+[MoviesMod Cache] Redis cache is disabled (USE_REDIS_CACHE is not 'true'). Using file system cache only.
+[MoviesMod] URL validation is enabled.
+[TopMovies] No proxy configured
+[TopMovies] URL validation is enabled.
+[TopMovies Cache] Redis cache is disabled (USE_REDIS_CACHE is not 'true'). Using file system cache only.
+[MoviesDrive] Internal cache is enabled.
+[MoviesDrive Cache] Redis cache is disabled (USE_REDIS_CACHE is not 'true'). Using file system cache only.
+[4KHDHub Cache] Redis cache is disabled (USE_REDIS_CACHE is not 'true'). Using file system cache only.
+[HDHub4u Cache] Internal cache is enabled.
+[HDHub4u Cache] Redis cache is disabled (USE_REDIS_CACHE is not 'true'). Using file system cache only.
+[HDHub4u] No proxy configured, using direct connections
+[Analytics] GA4 Measurement Protocol is disabled. Set GA_MEASUREMENT_ID and GA_API_SECRET to enable.
+Using proxy/direct mode with Showbox.js
+Nuvio Streams Addon landing page available at http://localhost:7777
+Default Addon Manifest available at: http://localhost:7777/manifest.json
+To generate a personalized manifest, append ?cookie=YOUR_URL_ENCODED_COOKIE to the manifest URL.
+Example: http://localhost:7777/manifest.json?cookie=ui%3Dyourcookievalue
+Install example: stremio://localhost:7777/manifest.json?cookie=ui%3Dyourcookievalue
+[Stream Cache] Cache directory ensured at C:\Users\rames\Downloads\New folder (6)\.streams_cache
+Incoming request: /stream/movie/tt0133093.json
+[addon.js] Read from global.currentRequestConfig: {}
+[addon.js] No minimum quality preferences set by user.
+[addon.js] No codec exclude preferences set by user.
+--- FULL ARGS OBJECT (from SDK) ---
+{
+  "type": "movie",
+  "id": "tt0133093",
+  "extra": {},
+  "config": {}
+}
+--- SDK ARGS.CONFIG (still logging for comparison) ---
+{}
+---------------------------------
+Stream request for Stremio type: 'movie', id: 'tt0133093'
+Effective request details: {"regionPreference":"none","hasCookie":false,"cookieCount":0,"selectedProviders":"all"}
+[addon.js] No region preference found in global config.
+[addon.js] No cookie found in global config.
+[addon.js] No specific providers selected by user in global config, will attempt all.
+  Received IMDb ID: tt0133093. Attempting to convert to TMDB ID.
+  Attempting to convert IMDb ID: tt0133093 to TMDB ID (expected type: movie).
+    Fetching from TMDB find API: https://api.themoviedb.org/3/find/tt0133093?api_key=439c478a771f35c05022f9feabcca01c&external_source=imdb_id
+convertImdbToTmdb_apiCall_tt0133093: 10.041s
+    Error during TMDB find API call for IMDb ID tt0133093: timeout of 10000ms exceeded
+convertImdbToTmdb_total_tt0133093: 10.041s
+  Failed to convert IMDb ID tt0133093 to TMDB ID.
+[server.js] Cleared cookie and region preference after request processing

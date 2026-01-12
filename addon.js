@@ -970,17 +970,21 @@ builder.defineStreamHandler(async (args) => {
             console.log(`  Parsed season ${seasonNum}, episode ${episodeNum} from IMDb ID parts`);
         }
 
+        global.currentRequestImdbId = baseImdbId; // Store IMDB ID early for fallback usage
+
         // Pass userRegionPreference and expected type to convertImdbToTmdb
         const conversionResult = await convertImdbToTmdb(baseImdbId, userRegionPreference, type);
         if (conversionResult && conversionResult.tmdbId && conversionResult.tmdbType) {
             tmdbId = conversionResult.tmdbId;
             tmdbTypeFromId = conversionResult.tmdbType;
             initialTitleFromConversion = conversionResult.title; // Capture title from conversion
-            global.currentRequestImdbId = baseImdbId; // Store IMDB ID for torrent provider
             console.log(`  Successfully converted IMDb ID ${baseImdbId} to TMDB ${tmdbTypeFromId} ID ${tmdbId} (${initialTitleFromConversion || 'No title returned'})`);
         } else {
-            console.log(`  Failed to convert IMDb ID ${baseImdbId} to TMDB ID.`);
-            return { streams: [] };
+            console.log(`  Failed to convert IMDb ID ${baseImdbId} to TMDB ID. Entering fallback mode for providers supporting IMDb ID.`);
+            // Fallback parameters to allow partial functionality (e.g. Torrents via YTS/EZTV)
+            tmdbId = baseImdbId;
+            tmdbTypeFromId = type === 'movie' ? 'movie' : 'tv';
+            initialTitleFromConversion = null;
         }
     } else {
         console.log(`  Unrecognized ID format: ${id}`);
@@ -1822,11 +1826,11 @@ builder.defineStreamHandler(async (args) => {
         // Torrent provider with cache integration (YTS, EZTV, 1337x)
         torrent: async () => {
             if (!ENABLE_TORRENT_PROVIDER) {
-                console.log('[Torrent] Skipping fetch: Disabled by environment variable.');
+                console.log('[Torrent] Skipping fetch: Disabled by environment variable (ENABLE_TORRENT_PROVIDER is false).');
                 return [];
             }
             if (!shouldFetch('torrent')) {
-                console.log('[Torrent] Skipping fetch: Not selected by user.');
+                console.log(`[Torrent] Skipping fetch: Not selected by user. userProviders=${selectedProvidersArray ? selectedProvidersArray.join(',') : 'none'}`);
                 return [];
             }
 

@@ -89,7 +89,29 @@ function createMagnetLink(infoHash, title) {
         'https://tracker.tamersunion.org:443/announce',
         'https://tracker.lilithraws.org:443/announce',
         'http://tracker.bt4g.com:2095/announce',
-        'udp://tracker.cyberia.is:6969/announce'
+        'udp://tracker.cyberia.is:6969/announce',
+        'udp://tracker.torrent.eu.org:451/announce',
+        'udp://tracker.moeking.me:6969/announce',
+        'udp://tracker.bitsearch.to:1337/announce',
+        'udp://tracker.opentrackr.org:1337/announce',
+        'http://tracker.openbittorrent.com:80/announce',
+        'udp://opentracker.i2p.rocks:6969/announce',
+        'udp://tracker.internetwarriors.net:1337/announce',
+        'udp://tracker.leechers-paradise.org:6969/announce',
+        'udp://coppersurfer.tk:6969/announce',
+        'udp://tracker.zer0day.to:1337/announce',
+        'udp://tracker.tiny-vps.com:6969/announce',
+        'udp://open.stealth.si:80/announce',
+        'udp://exodus.desync.com:6969/announce',
+        'udp://yourbittorrent.com:80/announce',
+        'udp://ipv4.tracker.harry.lu:80/announce',
+        'https://tracker.tamersunion.org:443/announce',
+        'https://tracker.lilithraws.org:443/announce',
+        'http://tracker.bt4g.com:2095/announce',
+        'udp://9.rarbg.me:2970/announce',
+        'udp://p4p.arenabg.com:1337/announce',
+        'udp://tracker.birkenwald.de:6969/announce',
+        'http://t.nyaatracker.com:80/announce'
     ];
 
     const encodedTitle = encodeURIComponent(title || 'Unknown');

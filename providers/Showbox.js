@@ -180,7 +180,7 @@ const convertImdbToTmdb = async (imdbId, regionPreference = null, expectedType =
     console.time(`convertImdbToTmdb_apiCall_${imdbId}`);
 
     try {
-        const response = await axios.get(findApiUrl, { timeout: 10000 });
+        const response = await axios.get(findApiUrl, { timeout: 5000 });
         console.timeEnd(`convertImdbToTmdb_apiCall_${imdbId}`);
         const findResults = response.data;
 
