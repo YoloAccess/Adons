@@ -13,7 +13,7 @@ const cheerio = require('cheerio');
 
 // API Base URLs
 const YTS_API_URL = 'https://yts.mx/api/v2';
-const EZTV_API_URL = 'https://eztvx.to/api';
+const EZTV_API_URL = 'https://eztv.re/api';
 
 // Quality emoji mapping
 const QUALITY_EMOJI = {
@@ -112,8 +112,15 @@ async function getYTSTorrents(imdbId, title = null) {
             }
         });
 
+        console.log(`[YTS] Response status: ${response.status}`);
+        if (response.data && response.data.data && response.data.data.movies) {
+            // console.log(`[YTS] Found ${response.data.data.movies.length} movies`);
+        } else {
+            console.log(`[YTS] API Response structure invalid or empty:`, JSON.stringify(response.data).substring(0, 100));
+        }
+
         if (response.data?.status !== 'ok' || !response.data?.data?.movies) {
-            console.log('[YTS] No movies found');
+            console.log('[YTS] No movies found in response data');
             return [];
         }
 
@@ -192,6 +199,11 @@ async function getEZTVTorrents(imdbId, season, episode) {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             }
         });
+
+        console.log(`[EZTV] Response status: ${response.status}`);
+        if (!response.data || !response.data.torrents) {
+            console.log(`[EZTV] No torrents in response. Data:`, JSON.stringify(response.data).substring(0, 100));
+        }
 
         if (!response.data?.torrents || response.data.torrents.length === 0) {
             console.log('[EZTV] No torrents found');
@@ -348,6 +360,59 @@ async function get1337xTorrents(query, type = 'movie') {
 }
 
 /**
+ * Search APIBay (The Pirate Bay) - Robust Fallback
+ * @param {string} query - Search query
+ * @returns {Promise<Array>} Array of torrent streams
+ */
+async function getAPIBayTorrents(query) {
+    console.log(`[APIBay] Searching for: ${query}`);
+    const streams = [];
+    try {
+        const url = `https://apibay.org/q.php?q=${encodeURIComponent(query)}`;
+        const response = await axios.get(url, { timeout: 10000 });
+
+        if (response.data && Array.isArray(response.data) && response.data.length > 0 && response.data[0].name !== 'No results returned') {
+            const torrents = response.data.slice(0, 10); // Top 10
+            for (const torrent of torrents) {
+                const title = torrent.name;
+                const seeds = parseInt(torrent.seeders) || 0;
+                const peers = parseInt(torrent.leechers) || 0;
+                const size = formatSize(torrent.size);
+                const infoHash = torrent.info_hash;
+
+                // Simple quality guess
+                let quality = '720p';
+                if (/2160p|4K|UHD/i.test(title)) quality = '2160p';
+                else if (/1080p/i.test(title)) quality = '1080p';
+
+                const emoji = getQualityEmoji(quality);
+
+                streams.push({
+                    name: 'Nuvio | TPB',
+                    title: `${emoji} TPB • ${quality}\n📦 ${size} • 🌱 ${seeds} seeds`,
+                    quality: quality,
+                    infoHash: infoHash,
+                    url: createMagnetLink(infoHash, title),
+                    seeds: seeds,
+                    peers: peers,
+                    size: size,
+                    type: 'torrent',
+                    behaviorHints: {
+                        bingeGroup: `tpb-${infoHash}`
+                    }
+                });
+            }
+            console.log(`[APIBay] Found ${streams.length} torrents`);
+        } else {
+            console.log(`[APIBay] No results.`);
+        }
+    } catch (e) {
+        console.error(`[APIBay] Error: ${e.message}`);
+    }
+    return streams;
+}
+
+/**
  * Get torrent streams for a movie
  * @param {string} imdbId - IMDB ID
  * @param {string} title - Movie title
@@ -359,11 +424,18 @@ async function getMovieTorrents(imdbId, title, year) {
 
     const streams = [];
 
-    // Fetch from YTS (primary for movies)
+    // 1. YTS
     const ytsStreams = await getYTSTorrents(imdbId, title);
     streams.push(...ytsStreams);
 
-    // If YTS didn't return results, try 1337x
+    // 2. APIBay (TPB) - Very reliable fallback
+    if (streams.length < 3) {
+        const searchQuery = year ? `${title} ${year}` : title;
+        const tpbStreams = await getAPIBayTorrents(searchQuery);
+        streams.push(...tpbStreams);
+    }
+
+    // 3. 1337x
     if (streams.length < 3) {
         const searchQuery = year ? `${title} ${year}` : title;
         const fallbackStreams = await get1337xTorrents(searchQuery, 'movie');
@@ -381,7 +453,6 @@ async function getMovieTorrents(imdbId, title, year) {
             uniqueStreams.push(stream);
         }
     }
-
     console.log(`[Torrents] Total movie torrents: ${uniqueStreams.length}`);
     return uniqueStreams;
 }
@@ -399,11 +470,20 @@ async function getSeriesTorrents(imdbId, title, season, episode) {
 
     const streams = [];
 
-    // Fetch from EZTV (primary for TV)
+    // 1. EZTV
     const eztvStreams = await getEZTVTorrents(imdbId, season, episode);
     streams.push(...eztvStreams);
 
-    // If EZTV didn't return results, try 1337x
+    // 2. APIBay (TPB)
+    if (streams.length < 3) {
+        const seasonPadded = String(season).padStart(2, '0');
+        const episodePadded = String(episode).padStart(2, '0');
+        const searchQuery = `${title} S${seasonPadded}E${episodePadded}`;
+        const tpbStreams = await getAPIBayTorrents(searchQuery);
+        streams.push(...tpbStreams);
+    }
+
+    // 3. 1337x
     if (streams.length < 3) {
         const seasonPadded = String(season).padStart(2, '0');
         const episodePadded = String(episode).padStart(2, '0');
@@ -423,7 +503,6 @@ async function getSeriesTorrents(imdbId, title, season, episode) {
             uniqueStreams.push(stream);
         }
     }
-
     console.log(`[Torrents] Total series torrents: ${uniqueStreams.length}`);
     return uniqueStreams;
 }
@@ -455,6 +534,7 @@ module.exports = {
     getSeriesTorrents,
     getYTSTorrents,
     getEZTVTorrents,
+    getAPIBayTorrents,
     get1337xTorrents,
     createMagnetLink
 };
