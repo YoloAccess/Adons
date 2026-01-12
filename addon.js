@@ -23,6 +23,18 @@ const path = require('path');
 const crypto = require('crypto'); // For hashing cookies
 const Redis = require('ioredis');
 
+// Cached node-fetch import for performance (avoid dynamic import overhead)
+let cachedFetch = null;
+const getNodeFetch = async () => {
+    if (!cachedFetch) {
+        const { default: fetch } = await import('node-fetch');
+        cachedFetch = fetch;
+    }
+    return cachedFetch;
+};
+// Pre-warm the fetch cache on startup
+getNodeFetch().catch(() => { });
+
 // Add Redis client if enabled
 const USE_REDIS_CACHE = process.env.USE_REDIS_CACHE === 'true';
 let redis = null;
@@ -188,7 +200,7 @@ if (USE_EXTERNAL_PROVIDERS) {
 
 // NEW: Stream caching config
 const STREAM_CACHE_DIR = process.env.VERCEL ? path.join('/tmp', '.streams_cache') : path.join(__dirname, '.streams_cache');
-const STREAM_CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
+const STREAM_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours - streams stay valid longer
 const ENABLE_STREAM_CACHE = process.env.DISABLE_STREAM_CACHE !== 'true'; // Enabled by default
 console.log(`[addon.js] Stream links caching ${ENABLE_STREAM_CACHE ? 'enabled' : 'disabled'}`);
 console.log(`[addon.js] Redis caching ${redis ? 'available' : 'not available'}`);
@@ -405,7 +417,7 @@ function applyAllStreamFilters(streams, providerName, minQualitySetting, exclude
 }
 
 async function fetchWithRetry(url, options, maxRetries = MAX_RETRIES) {
-    const { default: fetchFunction } = await import('node-fetch'); // Dynamically import
+    const fetchFunction = await getNodeFetch(); // Use cached import for performance
     let lastError;
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
@@ -453,7 +465,7 @@ async function sendAnalyticsEvent(eventName, eventParams) {
     };
 
     try {
-        const { default: fetchFunction } = await import('node-fetch');
+        const fetchFunction = await getNodeFetch(); // Use cached import
         // Use a proper timeout and catch any network errors to prevent crashes
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 5000); // 5 second timeout
@@ -1738,8 +1750,8 @@ builder.defineStreamHandler(async (args) => {
     console.log('Running parallel provider fetches with caching...');
 
     try {
-        // Execute all provider functions in parallel with 10-second timeout
-        const PROVIDER_TIMEOUT_MS = 45000; // 10 seconds
+        // Execute all provider functions in parallel with 15-second timeout
+        const PROVIDER_TIMEOUT_MS = 15000; // 15 seconds - optimized for user experience
         const providerPromises = [
             timeProvider('ShowBox', providerFetchFunctions.showbox()),
             timeProvider('Soaper TV', providerFetchFunctions.soapertv()),
