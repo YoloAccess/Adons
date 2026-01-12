@@ -18,7 +18,7 @@
   "catalogs": [],
   "behaviorHints": {
     "adult": false,
-    "p2pNotSupported": true,
+    "p2pNotSupported": false,
     "configurable": true
   },
   "stremioAddonsConfig": {
