@@ -429,6 +429,10 @@
             font-size: 0.8rem;
         }
 
+        .torrent-icon {
+            background: linear-gradient(135deg, #00b09b, #96c93d);
+        }
+
         .showbox-icon {
             background: linear-gradient(135deg, #ff7a00, #ff0050);
         }
@@ -2050,6 +2054,11 @@
                 <div class="providers">
                     <h2>Available Providers</h2>
                     <div class="provider-item">
+                        <div class="provider-icon torrent-icon">🌀</div>
+                        <div class="provider-name">Torrent</div>
+                        <span class="provider-detail">YTS, EZTV, 1337x, APIBay</span>
+                    </div>
+                    <div class="provider-item">
                         <div class="provider-icon showbox-icon">💎</div>
                         <div class="provider-name">ShowBox</div>
                         <span class="provider-detail">May contain 4K/DV/HDR</span>
@@ -2163,6 +2172,20 @@
                         <div class="provider-checkbox-item"
                             style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;">
                             <div style="display: flex; align-items: center;">
+                                <input type="checkbox" id="providerTorrent" name="providerSelect" value="torrent"
+                                    checked style="margin-right: 0.5rem; accent-color: var(--primary);">
+                                <label for="providerTorrent" style="font-size: 0.9rem;">Torrent <span
+                                        style="font-size: 0.75rem; color: var(--text-light);">(~4s)</span></label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.8rem;">
+                                <span style="font-size: 0.75rem; color: var(--secondary); font-weight: 500;">High
+                                    Speed</span>
+                            </div>
+                        </div>
+
+                        <div class="provider-checkbox-item"
+                            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;">
+                            <div style="display: flex; align-items: center;">
                                 <input type="checkbox" id="providerShowbox" name="providerSelect" value="showbox"
                                     checked style="margin-right: 0.5rem; accent-color: var(--primary);">
                                 <label for="providerShowbox" style="font-size: 0.9rem;">ShowBox <span
@@ -2199,10 +2222,7 @@
                             </div>
                         </div>
 
-                        <div class="provider-checkbox-item"
-                            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;">
 
-                        </div>
 
                         <div class="provider-checkbox-item"
                             style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;">
