@@ -73,7 +73,7 @@ Nuvio Streams is a powerful Stremio addon that provides direct HTTP streaming li
 
 ### Key Features
 
-* **🌐 Multiple Sources** - Aggregates direct HTTP streams without P2P
+* **🌐 Multiple Sources** - Aggregates direct HTTP streams (Showbox, etc.) and Torrent streams (YTS, EZTV, 1337x, TorrentGalaxy, BitSearch, TPB) without P2P requirement setup
 * **Personal Cookie Support** - Get your own quota and access to 4K/HDR content
 * **🎯 Quality Filtering** - Set minimum quality requirements
 * **🔒 No P2P/Torrents** - Only direct HTTP streams

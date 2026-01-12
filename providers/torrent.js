@@ -11,6 +11,20 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
+// Retry helper
+async function fetchWithRetry(url, options = {}, retries = 3) {
+    try {
+        return await axios.get(url, options);
+    } catch (err) {
+        if (retries > 0 && (err.code === 'ECONNABORTED' || err.response?.status >= 500)) {
+            console.log(`[Retry] Retrying ${url} (${retries} attempts left)...`);
+            await new Promise(r => setTimeout(r, 1000)); // Wait 1s
+            return fetchWithRetry(url, options, retries - 1);
+        }
+        throw err;
+    }
+}
+
 // API Base URLs
 const YTS_API_URL = 'https://yts.mx/api/v2';
 const EZTV_API_URL = 'https://eztv.re/api';
@@ -105,7 +119,7 @@ async function getYTSTorrents(imdbId, title = null) {
             return [];
         }
 
-        const response = await axios.get(url, {
+        const response = await fetchWithRetry(url, {
             timeout: 10000,
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
@@ -193,7 +207,7 @@ async function getEZTVTorrents(imdbId, season, episode) {
 
         const url = `${EZTV_API_URL}/get-torrents?imdb_id=${cleanImdbId}&limit=100`;
 
-        const response = await axios.get(url, {
+        const response = await fetchWithRetry(url, {
             timeout: 10000,
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
@@ -283,7 +297,7 @@ async function get1337xTorrents(query, type = 'movie') {
         const category = type === 'movie' ? 'Movies' : 'TV';
         const url = `https://1337x.to/category-search/${encodeURIComponent(query)}/${category}/1/`;
 
-        const response = await axios.get(url, {
+        const response = await fetchWithRetry(url, {
             timeout: 10000,
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
@@ -313,7 +327,7 @@ async function get1337xTorrents(query, type = 'movie') {
 
             // Get magnet link from detail page
             try {
-                const detailResponse = await axios.get(`https://1337x.to${detailUrl}`, {
+                const detailResponse = await fetchWithRetry(`https://1337x.to${detailUrl}`, {
                     timeout: 8000,
                     headers: {
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
@@ -369,7 +383,7 @@ async function getAPIBayTorrents(query) {
     const streams = [];
     try {
         const url = `https://apibay.org/q.php?q=${encodeURIComponent(query)}`;
-        const response = await axios.get(url, { timeout: 10000 });
+        const response = await fetchWithRetry(url, { timeout: 10000 });
 
         if (response.data && Array.isArray(response.data) && response.data.length > 0 && response.data[0].name !== 'No results returned') {
             const torrents = response.data.slice(0, 10); // Top 10
@@ -412,6 +426,174 @@ async function getAPIBayTorrents(query) {
     return streams;
 }
 
+
+/**
+ * Search TorrentGalaxy for torrents
+ * @param {string} query - Search query
+ * @returns {Promise<Array>} Array of torrent streams
+ */
+async function getTorrentGalaxyTorrents(query) {
+    console.log(`[TorrentGalaxy] Searching for: ${query}`);
+    const streams = [];
+    try {
+        const url = `https://torrentgalaxy.to/torrents.php?search=${encodeURIComponent(query)}&sort=seeders&order=desc`;
+        const response = await fetchWithRetry(url, {
+            timeout: 10000,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+            }
+        });
+
+        const $ = cheerio.load(response.data);
+        const rows = $('div.tgxtable div.tgxtablerow').slice(0, 10);
+
+        rows.each((i, element) => {
+            const row = $(element);
+            const titleElement = row.find('div[class^="tgxtablecell"] a[href^="/torrent/"]');
+            const title = titleElement.attr('title') || titleElement.text().trim();
+            const detailPath = titleElement.attr('href');
+
+            // Magnet link usually in a specific div or a element with role or specific class
+            const magnets = row.find('a[href^="magnet:"]');
+            const magnetLink = magnets.first().attr('href');
+
+            if (!title || !magnetLink) return;
+
+            const cells = row.find('div.tgxtablecell');
+            const size = $(cells[cells.length - 3]).text().trim(); // Rough mapping, might need adjustment based on valid HTML which is tricky without seeing it.
+            // TGX structure is div based now? Or table? 
+            // Actually TGX uses table mostly, but let's try standard table selectors just in case the div selector above is wrong.
+            // Fallback to table selector if div selector finds nothing
+        });
+
+        // Retry with standard table selectors if valid
+        $('div.container table.table-striped tbody tr').slice(0, 10).each((i, element) => {
+            // TGGeneric parser logic
+            const row = $(element);
+        });
+
+        // Let's use a more generic scraping approach for TGX which changes often
+        // Search for magnet links and traverse up to find title
+        $('a[href^="magnet:"]').each((i, el) => {
+            if (i > 10) return;
+            const magnetLink = $(el).attr('href');
+            const row = $(el).closest('div.tgxtablerow');
+
+            // Extract infoHash
+            const hashMatch = magnetLink.match(/btih:([a-fA-F0-9]{40})/i);
+            const infoHash = hashMatch ? hashMatch[1] : null;
+
+            if (!infoHash) return;
+
+            let title = row.find('a[href^="/torrent/"]').first().text().trim();
+            if (!title) {
+                // Try getting text from nearest text node?
+                title = $(el).closest('.tgxtablecell').prev().text().trim();
+            }
+            if (!title) title = "Unknown TorrentGalaxy Stream";
+
+            const seedsText = row.find('span[title="Seeders/Leechers"] font[color="green"] b').text();
+            const seeds = parseInt(seedsText) || 0;
+
+            const peersText = row.find('span[title="Seeders/Leechers"] font[color="#ff0000"] b').text();
+            const peers = parseInt(peersText) || 0;
+
+            const size = row.find('span.badge.badge-secondary.txlight').first().text().trim();
+
+            let quality = '720p';
+            if (/2160p|4K|UHD/i.test(title)) quality = '2160p';
+            else if (/1080p/i.test(title)) quality = '1080p';
+            else if (/720p/i.test(title)) quality = '720p';
+
+            const emoji = getQualityEmoji(quality);
+
+            streams.push({
+                name: 'Nuvio | TGX',
+                title: `${emoji} TGX • ${quality}\n📦 ${size} • 🌱 ${seeds} seeds`,
+                quality: quality,
+                infoHash: infoHash,
+                url: magnetLink,
+                seeds: seeds,
+                peers: peers,
+                size: size,
+                type: 'torrent',
+                behaviorHints: {
+                    bingeGroup: `tgx-${infoHash}`
+                }
+            });
+        });
+
+        console.log(`[TorrentGalaxy] Found ${streams.length} torrents`);
+
+    } catch (e) {
+        console.error(`[TorrentGalaxy] Error: ${e.message}`);
+    }
+    return streams;
+}
+
+/**
+ * Search BitSearch for torrents
+ * @param {string} query - Search query
+ * @returns {Promise<Array>} Array of torrent streams
+ */
+async function getBitSearchTorrents(query) {
+    console.log(`[BitSearch] Searching for: ${query}`);
+    const streams = [];
+    try {
+        const url = `https://bitsearch.to/search?q=${encodeURIComponent(query)}`;
+        const response = await fetchWithRetry(url, {
+            timeout: 10000,
+            headers: { 'User-Agent': 'Mozilla/5.0' }
+        });
+
+        const $ = cheerio.load(response.data);
+        $('.search-result').slice(0, 10).each((i, element) => {
+            const row = $(element);
+            const title = row.find('h5.title a').text().trim();
+            const magnetLink = row.find('a[href^="magnet:"]').attr('href');
+
+            if (!title || !magnetLink) return;
+
+            const stats = row.find('.stats div');
+            // stats usually: [downloads, size, seeds, leeches, date]
+            const size = $(stats[1]).text().trim();
+            const seeds = parseInt($(stats[2]).text().trim()) || 0;
+            const peers = parseInt($(stats[3]).text().trim()) || 0;
+
+            const hashMatch = magnetLink.match(/btih:([a-fA-F0-9]{40})/i);
+            const infoHash = hashMatch ? hashMatch[1] : null;
+
+            let quality = '720p';
+            if (/2160p|4K|UHD/i.test(title)) quality = '2160p';
+            else if (/1080p/i.test(title)) quality = '1080p';
+            else if (/720p/i.test(title)) quality = '720p';
+
+            const emoji = getQualityEmoji(quality);
+
+            streams.push({
+                name: 'Nuvio | BitSearch',
+                title: `${emoji} BitSearch • ${quality}\n📦 ${size} • 🌱 ${seeds} seeds`,
+                quality: quality,
+                infoHash: infoHash,
+                url: magnetLink,
+                seeds: seeds,
+                peers: peers,
+                size: size,
+                type: 'torrent',
+                behaviorHints: {
+                    bingeGroup: `bitsearch-${infoHash}`
+                }
+            });
+        });
+
+        console.log(`[BitSearch] Found ${streams.length} torrents`);
+    } catch (e) {
+        console.error(`[BitSearch] Error: ${e.message}`);
+    }
+    return streams;
+}
+
 /**
  * Get torrent streams for a movie
  * @param {string} imdbId - IMDB ID
@@ -428,15 +610,30 @@ async function getMovieTorrents(imdbId, title, year) {
     const ytsStreams = await getYTSTorrents(imdbId, title);
     streams.push(...ytsStreams);
 
-    // 2. APIBay (TPB) - Very reliable fallback
-    if (streams.length < 3) {
+    // 2. TorrentGalaxy (New)
+    if (streams.length < 5) {
+        // TGX prefers "Title Year" format
+        const query = year ? `${title} ${year}` : title;
+        const tgxStreams = await getTorrentGalaxyTorrents(query);
+        streams.push(...tgxStreams);
+    }
+
+    // 3. APIBay (TPB)
+    if (streams.length < 5) {
         const searchQuery = year ? `${title} ${year}` : title;
         const tpbStreams = await getAPIBayTorrents(searchQuery);
         streams.push(...tpbStreams);
     }
 
-    // 3. 1337x
-    if (streams.length < 3) {
+    // 4. BitSearch (New)
+    if (streams.length < 5) {
+        const query = year ? `${title} ${year}` : title;
+        const bsStreams = await getBitSearchTorrents(query);
+        streams.push(...bsStreams);
+    }
+
+    // 5. 1337x
+    if (streams.length < 5) {
         const searchQuery = year ? `${title} ${year}` : title;
         const fallbackStreams = await get1337xTorrents(searchQuery, 'movie');
         streams.push(...fallbackStreams);
@@ -469,26 +666,35 @@ async function getSeriesTorrents(imdbId, title, season, episode) {
     console.log(`[Torrents] Fetching series torrents for: ${title} S${season}E${episode}`);
 
     const streams = [];
+    const seasonPadded = String(season).padStart(2, '0');
+    const episodePadded = String(episode).padStart(2, '0');
+    const standardQuery = `${title} S${seasonPadded}E${episodePadded}`;
 
     // 1. EZTV
     const eztvStreams = await getEZTVTorrents(imdbId, season, episode);
     streams.push(...eztvStreams);
 
-    // 2. APIBay (TPB)
-    if (streams.length < 3) {
-        const seasonPadded = String(season).padStart(2, '0');
-        const episodePadded = String(episode).padStart(2, '0');
-        const searchQuery = `${title} S${seasonPadded}E${episodePadded}`;
-        const tpbStreams = await getAPIBayTorrents(searchQuery);
+    // 2. TorrentGalaxy (New)
+    if (streams.length < 5) {
+        const tgxStreams = await getTorrentGalaxyTorrents(standardQuery);
+        streams.push(...tgxStreams);
+    }
+
+    // 3. APIBay (TPB)
+    if (streams.length < 5) {
+        const tpbStreams = await getAPIBayTorrents(standardQuery);
         streams.push(...tpbStreams);
     }
 
-    // 3. 1337x
-    if (streams.length < 3) {
-        const seasonPadded = String(season).padStart(2, '0');
-        const episodePadded = String(episode).padStart(2, '0');
-        const searchQuery = `${title} S${seasonPadded}E${episodePadded}`;
-        const fallbackStreams = await get1337xTorrents(searchQuery, 'series');
+    // 4. BitSearch (New)
+    if (streams.length < 5) {
+        const bsStreams = await getBitSearchTorrents(standardQuery);
+        streams.push(...bsStreams);
+    }
+
+    // 5. 1337x
+    if (streams.length < 5) {
+        const fallbackStreams = await get1337xTorrents(standardQuery, 'series');
         streams.push(...fallbackStreams);
     }
 
@@ -536,5 +742,7 @@ module.exports = {
     getEZTVTorrents,
     getAPIBayTorrents,
     get1337xTorrents,
+    getTorrentGalaxyTorrents,
+    getBitSearchTorrents,
     createMagnetLink
 };

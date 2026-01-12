@@ -703,6 +703,16 @@ app.get('/api/region-status', (req, res) => {
     res.json(status);
 });
 
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
+});
+
 const PORT = process.env.PORT || 7777;
 
 app.listen(PORT, () => {
