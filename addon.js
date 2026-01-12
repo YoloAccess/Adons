@@ -1832,7 +1832,8 @@ builder.defineStreamHandler(async (args) => {
             '4KHDHub': ENABLE_4KHDHUB_PROVIDER && shouldFetch('4khdhub') ? applyAllStreamFilters(providerResults[9], '4KHDHub', minQualitiesPreferences['4khdhub'], excludeCodecsPreferences['4khdhub']) : [],
             'HDHub4u': ENABLE_HDHUB4U_PROVIDER && shouldFetch('hdhub4u') ? applyAllStreamFilters(providerResults[10], 'HDHub4u', minQualitiesPreferences.hdhub4u, excludeCodecsPreferences.hdhub4u) : [],
             'Vixsrc': ENABLE_VIXSRC_PROVIDER && shouldFetch('vixsrc') ? applyAllStreamFilters(providerResults[11], 'Vixsrc', minQualitiesPreferences.vixsrc, excludeCodecsPreferences.vixsrc) : [],
-            'MovieBox': ENABLE_MOVIEBOX_PROVIDER && shouldFetch('moviebox') ? applyAllStreamFilters(providerResults[12], 'MovieBox', minQualitiesPreferences.moviebox, excludeCodecsPreferences.moviebox) : []
+            'MovieBox': ENABLE_MOVIEBOX_PROVIDER && shouldFetch('moviebox') ? applyAllStreamFilters(providerResults[12], 'MovieBox', minQualitiesPreferences.moviebox, excludeCodecsPreferences.moviebox) : [],
+            'VidKing': ENABLE_VIDKING_PROVIDER && shouldFetch('vidking') ? applyAllStreamFilters(providerResults[13], 'VidKing', minQualitiesPreferences.vidking, excludeCodecsPreferences.vidking) : []
         };
 
         // Sort streams for each provider by quality, then size
@@ -1852,7 +1853,7 @@ builder.defineStreamHandler(async (args) => {
 
         // Combine streams in the preferred provider order
         combinedRawStreams = [];
-        const providerOrder = ['ShowBox', 'MovieBox', 'UHDMovies', '4KHDHub', 'HDHub4u', 'MoviesMod', 'TopMovies', 'MoviesDrive', 'Soaper TV', 'VidZee', 'MP4Hydra', 'VidSrc', 'Vixsrc'];
+        const providerOrder = ['ShowBox', 'MovieBox', 'VidKing', 'UHDMovies', '4KHDHub', 'HDHub4u', 'MoviesMod', 'TopMovies', 'MoviesDrive', 'Soaper TV', 'VidZee', 'MP4Hydra', 'VidSrc', 'Vixsrc'];
         providerOrder.forEach(providerKey => {
             if (streamsByProvider[providerKey] && streamsByProvider[providerKey].length > 0) {
                 combinedRawStreams.push(...streamsByProvider[providerKey]);
@@ -1912,6 +1913,20 @@ builder.defineStreamHandler(async (args) => {
                 type: 'url',
                 availability: 2,
                 behaviorHints: {
+                    notWebReady: true
+                }
+            };
+        }
+
+        // --- NEW: Special handling for VidKing (embed provider with externalUrl) ---
+        if (stream.provider === 'VidKing') {
+            return {
+                name: stream.name,    // Use the name from the provider, e.g., "Nuvio | VidKing"
+                title: stream.title,  // Use the title from the provider, e.g., "🌟 VidKing • 4K HDR"
+                externalUrl: stream.externalUrl,  // VidKing uses externalUrl for embed links
+                type: 'url',
+                availability: 2,
+                behaviorHints: stream.behaviorHints || {
                     notWebReady: true
                 }
             };
