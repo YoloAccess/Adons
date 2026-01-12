@@ -632,8 +632,13 @@ async function getMovieTorrents(imdbId, title, year) {
     // 1. YTS
     promises.push(getYTSTorrents(imdbId, title));
 
+    // Use IMDb ID as fallback query if title is missing
+    const effectiveSearchQuery = title || imdbId;
+    const queryYear = (title && year) ? `${title} ${year}` : effectiveSearchQuery;
+
+    console.log(`[Torrents] Search query: ${queryYear}`);
+
     // 2. TorrentGalaxy
-    const queryYear = year ? `${title} ${year}` : title;
     promises.push(getTorrentGalaxyTorrents(queryYear));
 
     // 3. APIBay (TPB)
@@ -685,7 +690,8 @@ async function getSeriesTorrents(imdbId, title, season, episode) {
 
     const seasonPadded = String(season).padStart(2, '0');
     const episodePadded = String(episode).padStart(2, '0');
-    const standardQuery = `${title} S${seasonPadded}E${episodePadded}`;
+    const effectiveTitle = title || imdbId;
+    const standardQuery = `${effectiveTitle} S${seasonPadded}E${episodePadded}`;
 
     // 1. EZTV
     promises.push(getEZTVTorrents(imdbId, season, episode));

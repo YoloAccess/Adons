@@ -972,16 +972,60 @@ builder.defineStreamHandler(async (args) => {
 
         global.currentRequestImdbId = baseImdbId; // Store IMDB ID early for fallback usage
 
-        // Pass userRegionPreference and expected type to convertImdbToTmdb
-        const conversionResult = await convertImdbToTmdb(baseImdbId, userRegionPreference, type);
+        // --- NEW: Title Cache Lookup ---
+        const TITLE_CACHE_KEY = `title_map_${baseImdbId}`;
+        let cachedTitleData = null;
+        if (redis) {
+            try {
+                const cached = await redis.get(TITLE_CACHE_KEY);
+                if (cached) {
+                    cachedTitleData = JSON.parse(cached);
+                    console.log(`  [Title Cache/Redis] HIT for ${baseImdbId}: ${cachedTitleData.title}`);
+                }
+            } catch (e) {
+                console.warn(`  [Title Cache/Redis] Error: ${e.message}`);
+            }
+        }
+
+        // File-based fallback for Title Cache
+        if (!cachedTitleData) {
+            try {
+                const titleCachePath = path.join(STREAM_CACHE_DIR, `${TITLE_CACHE_KEY}.json`);
+                const data = await fs.readFile(titleCachePath, 'utf-8');
+                cachedTitleData = JSON.parse(data);
+                console.log(`  [Title Cache/File] HIT for ${baseImdbId}: ${cachedTitleData.title}`);
+            } catch (e) {
+                // Ignore ENOENT
+            }
+        }
+
+        let conversionResult = cachedTitleData;
+
+        if (!conversionResult) {
+            // Pass userRegionPreference and expected type to convertImdbToTmdb
+            conversionResult = await convertImdbToTmdb(baseImdbId, userRegionPreference, type);
+
+            if (conversionResult && conversionResult.tmdbId && conversionResult.title) {
+                // Save to Redis
+                if (redis) {
+                    redis.set(TITLE_CACHE_KEY, JSON.stringify(conversionResult), 'EX', 7 * 24 * 60 * 60).catch(() => { });
+                }
+                // Save to file
+                try {
+                    const titleCachePath = path.join(STREAM_CACHE_DIR, `${TITLE_CACHE_KEY}.json`);
+                    await fs.writeFile(titleCachePath, JSON.stringify(conversionResult), 'utf-8').catch(() => { });
+                } catch (e) { }
+            }
+        }
+
         if (conversionResult && conversionResult.tmdbId && conversionResult.tmdbType) {
             tmdbId = conversionResult.tmdbId;
             tmdbTypeFromId = conversionResult.tmdbType;
             initialTitleFromConversion = conversionResult.title; // Capture title from conversion
-            console.log(`  Successfully converted IMDb ID ${baseImdbId} to TMDB ${tmdbTypeFromId} ID ${tmdbId} (${initialTitleFromConversion || 'No title returned'})`);
+            console.log(`  Successfully resolved IMDb ID ${baseImdbId} to ${tmdbTypeFromId} ${tmdbId} (${initialTitleFromConversion || 'No title returned'})`);
         } else {
-            console.log(`  Failed to convert IMDb ID ${baseImdbId} to TMDB ID. Entering fallback mode for providers supporting IMDb ID.`);
-            // Fallback parameters to allow partial functionality (e.g. Torrents via YTS/EZTV)
+            console.log(`  Failed to resolve IMDb ID ${baseImdbId}. Entering fallback mode.`);
+            // Fallback parameters
             tmdbId = baseImdbId;
             tmdbTypeFromId = type === 'movie' ? 'movie' : 'tv';
             initialTitleFromConversion = null;
@@ -997,6 +1041,9 @@ builder.defineStreamHandler(async (args) => {
     }
 
     let movieOrSeriesTitle = initialTitleFromConversion;
+    if (!movieOrSeriesTitle && global.currentRequestImdbId) {
+        movieOrSeriesTitle = global.currentRequestImdbId; // Use IMDb ID as fallback title for search queries
+    }
     let movieOrSeriesYear = null;
     let seasonTitle = null;
 
@@ -1878,8 +1925,8 @@ builder.defineStreamHandler(async (args) => {
     console.log('Running parallel provider fetches with caching...');
 
     try {
-        // Execute all provider functions in parallel with 15-second timeout
-        const PROVIDER_TIMEOUT_MS = 15000; // 15 seconds - optimized for user experience
+        // Execute all provider functions in parallel with 30-second timeout
+        const PROVIDER_TIMEOUT_MS = 30000; // 30 seconds - allowed for slow scrapers
         const providerPromises = [
             timeProvider('ShowBox', providerFetchFunctions.showbox()),
             timeProvider('Soaper TV', providerFetchFunctions.soapertv()),
@@ -1899,14 +1946,14 @@ builder.defineStreamHandler(async (args) => {
             timeProvider('Torrent', providerFetchFunctions.torrent())
         ];
 
-        // Implement proper timeout that returns results immediately after 10 seconds
+        // Implement proper timeout that returns results immediately after the timeout period
         let providerResults;
         let timeoutOccurred = false;
 
         const timeoutPromise = new Promise((resolve) => {
             setTimeout(() => {
                 timeoutOccurred = true;
-                console.log(`[Timeout] 30-second timeout reached. Returning fetched links so far.`);
+                console.log(`[Timeout] ${PROVIDER_TIMEOUT_MS / 1000}-second timeout reached. Returning fetched links so far.`);
                 resolve('timeout');
             }, PROVIDER_TIMEOUT_MS);
         });
